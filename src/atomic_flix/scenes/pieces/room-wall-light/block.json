@@ -1,0 +1,19 @@
+{
+ "name": "room-wall-light", "version": 1,
+ "summary": "A room open toward -y (floor, three walls, ceiling) with a glowing sconce and a real point light on the back wall.",
+ "settings": {
+  "width": {"type": "float", "fallback": 5.0, "min": 1},
+  "depth": {"type": "float", "fallback": 4.0, "min": 1},
+  "height": {"type": "float", "fallback": 2.8, "min": 1.8},
+  "ceiling": {"type": "bool", "fallback": true},
+  "lamp_x": {"type": "float", "fallback": 0.0},
+  "lamp_height": {"type": "float", "fallback": 1.9, "min": 0.2},
+  "lamp_power": {"type": "float", "fallback": 60.0, "min": 0},
+  "lamp_color": {"type": "vec3", "fallback": [1.0, 0.78, 0.55], "min": 0},
+  "walls": {"type": "surface", "fallback": "plaster"},
+  "floor": {"type": "surface", "fallback": "wood"}
+ },
+ "ground_box": [-2.6, -2.0, 2.6, 2.1], "tags": ["set", "interior"],
+ "surfaces": ["plaster", "wood", "steel", "lamp-shade"],
+ "provenance": "hand-written", "rights": "ours"
+}

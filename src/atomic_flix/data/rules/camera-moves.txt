@@ -1,0 +1,38 @@
+# Camera moves (CM1, P2): words alone do not move the camera; a move needs a drawn end still, and a pinned last frame pulls a moving camera back.
+rise
+rises
+rising
+tilt
+tilts
+tilting
+crane
+cranes
+craning
+fly
+flies
+flying
+fly into
+push-in
+push in
+pushes in
+pull back
+pulls back
+pull-back
+dolly
+dollies
+glide
+glides
+gliding
+orbit
+orbits
+pan
+pans
+panning
+tracking
+tracks with
+zoom in
+zooms in
+zoom out
+zooms out
+moves with
+follows her

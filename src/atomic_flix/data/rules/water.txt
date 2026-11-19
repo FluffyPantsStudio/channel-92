@@ -1,0 +1,12 @@
+# Water and bath words (W1).
+bath
+bathtub
+tub
+water
+pool
+swim
+swimming
+sea
+lake
+river
+ocean

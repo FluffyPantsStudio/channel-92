@@ -1,0 +1,11 @@
+# Words for a person in a still or prompt (W1).
+she
+her
+woman
+girl
+man
+he
+him
+frankie
+singer
+person

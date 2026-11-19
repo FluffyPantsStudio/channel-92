@@ -1,0 +1,10 @@
+# Face acts a prompt must not name, even to forbid them (H3).
+laugh
+smile
+grin
+frown
+blink
+yawn
+cry
+sneer
+pout

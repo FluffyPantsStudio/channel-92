@@ -1,0 +1,18 @@
+{
+ "name": "kitchen-counter", "version": 1,
+ "summary": "A run of kitchen base units along +x with its back to the y = 0 wall and doors facing -y: plinth, doors, worktop, tiled splashback, optional wall units and sink.",
+ "settings": {
+  "extent": {"type": "float", "fallback": 3.0, "min": 0.6},
+  "depth": {"type": "float", "fallback": 0.62, "min": 0.3},
+  "height": {"type": "float", "fallback": 0.9, "min": 0.5},
+  "door": {"type": "float", "fallback": 0.6, "min": 0.2},
+  "uppers": {"type": "bool", "fallback": true},
+  "sink": {"type": "bool", "fallback": true},
+  "units": {"type": "surface", "fallback": "cupboard"},
+  "top": {"type": "surface", "fallback": "counter-top"},
+  "splash": {"type": "surface", "fallback": "tile"}
+ },
+ "ground_box": [0, -0.64, 3.0, 0.02], "tags": ["set", "kitchen", "interior"],
+ "surfaces": ["cupboard", "counter-top", "tile", "steel"],
+ "provenance": "hand-written", "rights": "ours"
+}

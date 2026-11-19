@@ -1,0 +1,13 @@
+{
+ "name": "eye-on-stalk", "version": 1,
+ "summary": "A glowing glass eye on a metal pole, its iris turned toward a point (the camera's start by default).",
+ "settings": {
+  "height": {"type": "float", "fallback": 12, "min": 0.5},
+  "radius": {"type": "float", "fallback": 1.0, "min": 0.05},
+  "pole": {"type": "float", "fallback": 0.06, "min": 0.005},
+  "look": {"type": "vec3", "fallback": [0, 0, 1.4]}
+ },
+ "ground_box": [-1, -1, 1, 1], "tags": ["prop", "street", "surreal"],
+ "surfaces": ["eye-white", "iris", "pupil", "pole"],
+ "provenance": "ported from lab/blender/street.py", "rights": "ours"
+}

@@ -1,0 +1,16 @@
+{
+ "name": "drawers", "version": 1,
+ "summary": "Drawers left open on a wall face: the face is the instance's y = 0 plane and the drawers stick out toward -y.",
+ "settings": {
+  "count": {"type": "int", "fallback": 46, "min": 0},
+  "x": {"type": "span", "fallback": [5, 140]},
+  "z": {"type": "span", "fallback": [1.5, 18]},
+  "out": {"type": "span", "fallback": [0.35, 0.9], "min": 0.08},
+  "width": {"type": "float", "fallback": 0.88, "min": 0.05},
+  "height": {"type": "float", "fallback": 0.7, "min": 0.05},
+  "surface": {"type": "surface", "fallback": "drawer"},
+  "inside": {"type": "surface", "fallback": "drawer-in"}
+ },
+ "ground_box": [5, -0.9, 140, 0], "tags": ["set", "street"], "surfaces": ["drawer", "drawer-in"],
+ "provenance": "ported from lab/blender/street.py", "rights": "ours"
+}

@@ -1,0 +1,27 @@
+# Verbs of holding or bringing an object (A1, L004).
+hold
+holds
+holding
+held
+carry
+carries
+carrying
+bring
+brings
+bringing
+picks up
+pick up
+offer
+offers
+offering
+show
+shows
+showing
+grip
+grips
+clutch
+clutches
+turns
+lowers
+lifts
+raises

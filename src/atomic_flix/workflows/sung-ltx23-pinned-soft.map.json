@@ -1,0 +1,5 @@
+{
+ "format": "atomic-flix/graph-map@1",
+ "graph": "sung-ltx23-pinned-soft.json",
+ "names": {"wording": "prompt", "opening_still": "first_frame", "closing_still": "last_frame", "likeness": "portrait", "save_as": "prefix"}
+}

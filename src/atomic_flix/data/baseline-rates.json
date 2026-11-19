@@ -1,0 +1,15 @@
+{
+ "about": "GPU seconds per second of rendered video, measured on our first film (Girl In The Magic Tub, 2026-11-13 to 2026-11-15) on RTX 3090s at 1280x704. Copied from the Atomic Songbirds' own baseline (flix/baseline.json, gpu.gpu_seconds_per_video_second, timed rows of stats/jobs.jsonl). Replace with this machine's own log when it has one.",
+ "provenance": "Atomic Songbirds flix/baseline.json, written 2026-11-19",
+ "size": [1280, 704],
+ "rates": {
+  "sung_pinned": 28.1,
+  "sung_unpinned": 14.6,
+  "sung_soft_pin": 26.9,
+  "plate_unpinned": 27.7,
+  "plate_pinned": 24.8
+ },
+ "jobs_measured": {"sung_pinned": 260, "sung_unpinned": 9, "sung_soft_pin": 12, "plate_unpinned": 83, "plate_pinned": 113},
+ "by_card": {"gpu0": 62.3, "gpu1": 19.3, "note": "the first film's GPU 0 ran near full memory and was three times slower; a card over twice its own median should stop getting renders"},
+ "takes_per_shot_first_film": {"sung": 21.5, "plate": 13.6}
+}

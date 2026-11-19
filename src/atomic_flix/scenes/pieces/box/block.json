@@ -1,0 +1,12 @@
+{
+ "name": "box", "version": 1,
+ "summary": "One box standing on the ground (or lifted), for stand-ins, backdrops and tests.",
+ "settings": {
+  "size": {"type": "vec3", "fallback": [1, 1, 1], "min": 0.001},
+  "lift": {"type": "float", "fallback": 0.0},
+  "yaw": {"type": "float", "fallback": 0.0},
+  "surface": {"type": "surface", "fallback": "drawer"}
+ },
+ "ground_box": [-0.5, -0.5, 0.5, 0.5], "tags": ["prop", "test"], "surfaces": ["drawer"],
+ "provenance": "hand-written", "rights": "ours"
+}

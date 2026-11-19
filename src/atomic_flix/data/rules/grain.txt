@@ -1,0 +1,11 @@
+# Grain, stock and texture words (K1): masters stay clean; grain is added once, in post.
+film grain
+grain
+grainy
+film stock
+35mm grain
+texture
+textured
+noise
+noisy
+speckled

@@ -1,0 +1,15 @@
+# Camera and set equipment (Q1): named equipment gets drawn into the room.
+tripod
+tripods
+light stand
+light stands
+camera crew
+crew
+boom
+boom mic
+c-stand
+c-stands
+softbox
+softboxes
+dolly track
+camera rig

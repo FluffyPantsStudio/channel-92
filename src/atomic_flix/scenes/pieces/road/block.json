@@ -1,0 +1,19 @@
+{
+ "name": "road", "version": 1,
+ "summary": "The street floor along +x: wide ground, the road, a raised sidewalk each side and pale edge lines.",
+ "settings": {
+  "extent": {"type": "float", "fallback": 600, "min": 1},
+  "width": {"type": "float", "fallback": 26, "min": 1},
+  "walk_width": {"type": "float", "fallback": 6, "min": 0.1},
+  "line_inset": {"type": "float", "fallback": 1.2, "min": 0},
+  "line_width": {"type": "float", "fallback": 0.22, "min": 0.01},
+  "ground_width": {"type": "float", "fallback": 2000, "min": 1},
+  "road": {"type": "surface", "fallback": "road"},
+  "walk": {"type": "surface", "fallback": "walk"},
+  "ground": {"type": "surface", "fallback": "ground"},
+  "paint": {"type": "surface", "fallback": "paint"}
+ },
+ "ground_box": [-600, -1000, 1200, 1000], "tags": ["set", "street"],
+ "surfaces": ["road", "walk", "ground", "paint"],
+ "provenance": "ported from lab/blender/street.py", "rights": "ours"
+}

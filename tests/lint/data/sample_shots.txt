@@ -1,0 +1,71 @@
+# A synthetic shot list in the kit's plain-text format, invented for the lint tests: a harbour, a laundromat and a
+# lighthouse, four sung shots (L01 to L06, see test_lint_samples.py) between cutaways. No real film's lines.
+
+N01 cutaway
+  still: stills/N01.png
+  figures: no
+  cam_move: a slow push-in along the pier
+  beat: gulls lift off the pier rail one by one
+  beat: the lamp at the end of the pier blinks twice
+
+S01 vocal: L01
+  still: stills/S01.png
+  setup: KA1
+  crop: 1.0
+  place: a rainy harbour at dawn, fishing boats knocking against the pier
+  gaze: at us
+  act L01: she sings one long open note, her lips in a soft round oo, her eyes open and calm
+
+N02 cutaway
+  still: stills/N02.png
+  figures: no
+  cam_move: locked
+  beat: rain runs down the fogged window of the harbour office
+  beat: a radio on the sill glows orange
+
+S02 vocal: L02 L03
+  still: stills/S02.png
+  setup: KA1
+  crop: 0.8
+  place: a rainy harbour at dawn, fishing boats knocking against the pier
+  gaze: at us
+  act L02: she sings to us, her head tilting a little
+  act L03: she lifts her chin a little
+
+N03 cutaway
+  still: stills/N03.png
+  figures: no
+  cam_move: locked
+  beat: a row of round washer doors, one drum turning slowly
+  beat: a sock slides down the glass
+
+S03 vocal: L04 L05
+  still: stills/S03.png
+  setup: KA2
+  crop: 1.0
+  place: an empty laundromat at night, one long row of round washer doors
+  gaze: at us
+  act L04: she sings the line to us, her eyes calm
+  act L05: she sings to us and nods slowly
+
+N04 cutaway
+  still: stills/N04.png
+  figures: no
+  cam_move: a slow push-in up the lighthouse stairs
+  beat: the lamp turns slowly above the stairs
+  beat: its beam sweeps across the grey sea
+
+S04 vocal: L06
+  still: stills/S04.png
+  setup: KA3
+  crop: 1.0
+  place: a lighthouse gallery high above a grey sea, the lamp turning slowly behind her
+  gaze: at us
+  act L06: she sings to us and nods slowly
+
+N05 cutaway
+  still: stills/N05.png
+  figures: no
+  cam_move: locked
+  beat: waves break against the foot of the lighthouse
+  beat: the beam goes out

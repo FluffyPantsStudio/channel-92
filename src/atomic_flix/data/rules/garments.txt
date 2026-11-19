@@ -1,0 +1,34 @@
+# Garment nouns (W1, L090).
+jacket
+jackets
+top
+tops
+shirt
+shirts
+blouse
+dress
+dresses
+coat
+coats
+tank top
+sweater
+jumper
+t-shirt
+trousers
+skirt
+jeans
+collar
+vest
+gown
+suit
+swimsuit
+bathing suit
+robe
+cardigan
+hoodie
+overalls
+leggings
+shorts
+bodysuit
+leotard
+uniform

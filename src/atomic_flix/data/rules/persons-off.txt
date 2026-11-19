@@ -1,0 +1,16 @@
+# People words for N2: a named person off screen walks in.
+man
+men
+woman
+women
+director
+people
+crowd
+someone
+somebody
+stranger
+figure
+he
+him
+boy
+girl

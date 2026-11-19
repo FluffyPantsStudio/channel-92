@@ -1,0 +1,61 @@
+{
+ "about": "Synthetic sung shots for the lint tests: invented place, singer, look and lines, written in the shape of a sung-shot record (shot, sung lines, framing, shown window, graph, prompt). No real film's lyric.",
+ "film": "Sample Harbour",
+ "look": "wearing a long green raincoat with the hood down over a grey knitted jumper",
+ "shots": [
+  {
+   "shot": "S01",
+   "sung": [
+    "ooo-oh-ooo"
+   ],
+   "framing": "from the chest up",
+   "shown_s": [
+    6.0,
+    10.5
+   ],
+   "workflow": "graphs/sung-pinned.json",
+   "prompt": "Nova sings to us from a rainy harbour at dawn, fishing boats knocking against the pier. She faces us for the whole shot and sings with small, natural mouth movements; she never laughs and never turns away. She is alone and moves with the music the whole time, her head and shoulders swaying gently, never stopping. The camera is locked off: it does not move and does not zoom. She stays exactly the same size in the frame, from the chest up, from the first frame to the last. Her manner is serious and soulful.\n0-1s: her lips closed; she looks at us, lips closed.\n1-5s: she sings \"ooo-oh-ooo\"; she sings one long open note, her lips in a soft round oo, her eyes open and calm.\n5-9s: her lips closed; she keeps swaying gently to the music, her eyes on us.\nHer face stays serious and soulful while she sings; her mouth only shapes the words.\nCamera: Locked-off camera: no zoom, no push-in, no pull-back. One continuous shot; no cuts.\nNova looks as in the first frame, wearing a long green raincoat with the hood down over a grey knitted jumper; natural anatomy. Only one Nova appears. No on-screen text."
+  },
+  {
+   "shot": "S02",
+   "sung": [
+    "Paper boats on a silver tide",
+    "Carry the names I could not hide"
+   ],
+   "framing": "from the chest up",
+   "shown_s": [
+    14.0,
+    22.0
+   ],
+   "workflow": "graphs/sung-pinned.json",
+   "prompt": "Nova sings to us from a rainy harbour at dawn, fishing boats knocking against the pier. She faces us for the whole shot and sings with small, natural mouth movements, her eyes on us. She is alone and moves with the music the whole time, her head and shoulders swaying gently, never stopping. The camera is locked off: it does not move and does not zoom. She stays exactly the same size in the frame, from the chest up, from the first frame to the last. Her manner is serious and soulful.\n0-1s: her lips closed; she looks at us, lips closed.\n1-4s: she sings \"Paper boats on a silver tide\"; she sings to us, her head tilting a little.\n4-8s: she sings \"Carry the names I could not hide\"; she lifts her chin a little.\n8-11s: her lips closed; she keeps swaying gently to the music, her eyes on us.\nHer face stays serious and soulful while she sings; her mouth only shapes the words.\nCamera: Locked-off camera: no zoom, no push-in, no pull-back. One continuous shot; no cuts.\nNova looks as in the first frame, wearing a long green raincoat with the hood down over a grey knitted jumper; natural anatomy. Only one Nova appears. No on-screen text."
+  },
+  {
+   "shot": "S03",
+   "sung": [
+    "Count the lamps along the quay",
+    "Every one is lit for me"
+   ],
+   "framing": null,
+   "shown_s": [
+    26.0,
+    32.0
+   ],
+   "workflow": "graphs/sung-pinned.json",
+   "prompt": "Two identical Novas stand face to face in an empty laundromat at night, one long row of round washer doors behind them. They are the same woman twice, in profile, close, and they sing the lines to each other with small, natural mouth movements; neither laughs and neither turns to us, and both keep moving gently with the music the whole time. The camera is locked off: it does not move and does not zoom. Both stay exactly the same size in the frame from the first frame to the last. Her manner is serious and soulful.\n0-1s: her lips closed; they look at each other, lips closed.\n1-3s: she sings \"Count the lamps along the quay\"; they sing the line to each other, face to face.\n3-6s: she sings \"Every one is lit for me\"; they hold each other's gaze as they sing.\n6-10s: her lips closed; they close their lips and hold each other's gaze.\nHer face stays serious and soulful while she sings; her mouth only shapes the words.\nCamera: Locked-off camera: no zoom, no push-in, no pull-back. One continuous shot; no cuts.\nNova looks as in the first frame, wearing a long green raincoat with the hood down over a grey knitted jumper; natural anatomy. Two identical Novas appear, face to face, and nobody else. No on-screen text."
+  },
+  {
+   "shot": "S04",
+   "sung": [
+    "Hold the rope and let it go"
+   ],
+   "framing": "from the waist up",
+   "shown_s": [
+    36.0,
+    41.5
+   ],
+   "workflow": "graphs/sung-plain.json",
+   "prompt": "Nova sings to us from a lighthouse gallery high above a grey sea, the lamp turning slowly behind her. She faces us for the whole shot and sings with small, natural mouth movements; she never turns away. She is alone and moves with the music the whole time, her head and shoulders swaying gently, never stopping. The camera is locked off: it does not move and does not zoom. She stays exactly the same size in the frame, from the waist up, from the first frame to the last. Her manner is serious and soulful.\n0-1s: her lips closed; she looks at us, lips closed.\n1-5s: she sings \"Hold the rope and let it go\"; she sings to us and nods slowly.\n5-9s: her lips closed; she keeps swaying gently to the music, her eyes on us.\nHer face stays serious and soulful while she sings; her mouth only shapes the words.\nCamera: Locked-off camera: no zoom, no push-in, no pull-back. One continuous shot; no cuts.\nNova looks as in the first frame, wearing a long green raincoat with the hood down over a grey knitted jumper; natural anatomy. Only one Nova appears. No on-screen text."
+  }
+ ]
+}

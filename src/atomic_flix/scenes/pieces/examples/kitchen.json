@@ -1,0 +1,15 @@
+{
+ "format": "atomic-flix/scene@1", "name": "kitchen-night", "seed": 2,
+ "size": {"w": 1152, "h": 640, "fps": 24, "frames": 73},
+ "world": {"sky": {"color": [0.02, 0.025, 0.04], "brightness": 1.0}, "mist": {"start": 1, "depth": 12}},
+ "lamps": [{"kind": "area", "name": "window", "color": [0.75, 0.85, 1.0], "power": 300, "pos": [-2.0, -1.5, 2.2],
+             "pitch": -30, "yaw": 20, "size": 1.5}],
+ "pieces": [
+  {"use": "room-wall-light", "settings": {"width": 5, "depth": 4, "height": 2.7, "lamp_x": 1.4, "lamp_power": 40}},
+  {"use": "kitchen-counter", "at": [-2.4, 2.0, 0], "settings": {"extent": 3.2}},
+  {"use": "chest-of-drawers", "at": [2.1, 1.0, 0], "turn": 180, "settings": {"open": 2}},
+  {"use": "figure", "id": "performer", "at": [-0.6, 0.2, 0], "turn": -90, "settings": {"anim": "walk", "speed": 0.0}}],
+ "viewpoint": {"lens": 28, "film_mm": 36, "far": 50,
+  "path": {"move": "push", "from": [0, -3.6, 1.5], "distance": 1.2, "yaw": 90, "pitch": -4, "ease": "eased35"}},
+ "capture": {"renderer": "raster", "spp": 32, "masks": ["performer", "chest-of-drawers"]}
+}

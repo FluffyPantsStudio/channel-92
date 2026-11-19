@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "atomic-flix"
+dynamic = ["version"]
+description = "A local-first kit for making music videos from song stems with ComfyUI and Blender."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["numpy"]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "coverage", "build", "setuptools>=64"]
+
+[project.scripts]
+atomic-flix = "atomic_flix.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "atomic_flix.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+atomic_flix = ["data/*.json", "data/rules/*.txt", "scenes/FORMAT.md", "scenes/pieces/*.json",
+               "scenes/pieces/*/*.json", "scenes/pieces/*/*.py", "workflows/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "first_film: reads the first film's stems, takes or cuts (local only, read-only; needs FLIX_FIRST_FILM or the fixture pack, skipped without them)",
+    "blender: starts Blender headless (slow, no GPU needed for the tiny scene; skipped without Blender)",
+]
+
+[tool.coverage.run]
+source = ["atomic_flix"]
+omit = ["*/scenes/blender_run.py"]
+
+[tool.coverage.report]
+skip_empty = true

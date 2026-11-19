@@ -1,0 +1,17 @@
+{
+ "name": "chest-of-drawers", "version": 1,
+ "summary": "A freestanding set of drawers facing +x on short legs, some drawers pulled open.",
+ "settings": {
+  "width": {"type": "float", "fallback": 0.9, "min": 0.2},
+  "depth": {"type": "float", "fallback": 0.5, "min": 0.1},
+  "height": {"type": "float", "fallback": 1.1, "min": 0.2},
+  "rows": {"type": "int", "fallback": 4, "min": 1, "max": 12},
+  "open": {"type": "int", "fallback": 1, "min": 0, "max": 12},
+  "pull": {"type": "span", "fallback": [0.15, 0.35], "min": 0},
+  "body": {"type": "surface", "fallback": "wood"},
+  "fronts": {"type": "surface", "fallback": "drawer-front"}
+ },
+ "ground_box": [-0.25, -0.45, 0.6, 0.45], "tags": ["prop", "furniture", "drawers"],
+ "surfaces": ["wood", "drawer-front", "steel", "drawer-in"],
+ "provenance": "hand-written", "rights": "ours"
+}

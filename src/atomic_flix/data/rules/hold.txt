@@ -1,0 +1,14 @@
+# Hold and stop words a closing rest must avoid (L051): a rest that holds made her freeze before the cut.
+hold
+holds
+holding
+still
+stop
+stops
+stopping
+freeze
+freezes
+freezing
+motionless
+closes her lips and
+settles

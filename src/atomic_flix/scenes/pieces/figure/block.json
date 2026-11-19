@@ -1,0 +1,13 @@
+{
+ "name": "figure", "version": 1,
+ "summary": "A grey stand-in body for a driving performer, facing +x, animated per frame (idle, walk or sing), with its body points kept as a rig for pose guides.",
+ "settings": {
+  "height": {"type": "float", "fallback": 1.75, "min": 0.5, "max": 2.5},
+  "anim": {"type": "str", "fallback": "idle", "choices": ["idle", "walk", "sing"]},
+  "speed": {"type": "float", "fallback": 0.0, "min": 0, "max": 3},
+  "tempo": {"type": "float", "fallback": 1.0, "min": 0.1, "max": 4},
+  "surface": {"type": "surface", "fallback": "figure"}
+ },
+ "ground_box": [-0.3, -0.3, 0.3, 0.3], "tags": ["person", "stand-in"], "surfaces": ["figure"],
+ "provenance": "hand-written", "rights": "ours"
+}

@@ -1,0 +1,10 @@
+{
+ "name": "salt-flat", "version": 1,
+ "summary": "A flat ground to the horizon, salt crust by default (any material works, so it also serves as far ground).",
+ "settings": {
+  "size": {"type": "float", "fallback": 4000, "min": 1},
+  "surface": {"type": "surface", "fallback": "salt"}
+ },
+ "ground_box": [-2000, -2000, 2000, 2000], "tags": ["set", "outdoor", "ground"], "surfaces": ["salt"],
+ "provenance": "hand-written", "rights": "ours"
+}

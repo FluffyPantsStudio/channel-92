@@ -1,0 +1,22 @@
+{
+ "format": "atomic-flix/scene@1", "name": "cabinet-street", "seed": 11,
+ "size": {"w": 1920, "h": 1056, "fps": 24, "frames": 145},
+ "world": {"sky": {"image": "gen:dusk", "spin": 90, "brightness": 1.0}, "mist": {"start": 5, "depth": 400}},
+ "lamps": [
+  {"kind": "sun", "name": "key", "color": [1.0, 0.8, 0.745], "power": 5.0, "pitch": -24, "yaw": 196, "soft": 3},
+  {"kind": "sun", "name": "fill", "color": [0.94, 0.8, 0.88], "power": 1.0, "pitch": -35, "yaw": 70, "soft": 30},
+  {"kind": "sun", "name": "top", "color": [0.59, 0.78, 0.84], "power": 0.25, "pitch": -80, "yaw": -90, "soft": 30}],
+ "pieces": [
+  {"use": "road", "settings": {"extent": 600, "width": 26}},
+  {"use": "tower-row", "id": "front", "at": [0, 25, 0], "twin_across": "redraw"},
+  {"use": "tower-row", "id": "back", "at": [0, 43, 0], "twin_across": "redraw",
+   "settings": {"start": [9, 15], "width": [13, 20], "height": [35, 65], "gap": [7, 28], "depth": 14}},
+  {"use": "drawers", "at": [0, 19, 0], "twin_across": "redraw"},
+  {"use": "eye-on-stalk", "id": "eyes", "settings": {"height": [9, 15]},
+   "strew": {"along": "x", "from": 18, "to": 520, "step": 33, "nudge": 3, "across": [14.5, 16.5], "flip": "alternate"}},
+  {"use": "eye-on-stalk", "id": "eye-near-left", "at": [13, 15, 0], "settings": {"height": 10}},
+  {"use": "eye-on-stalk", "id": "eye-near-right", "at": [29, -15, 0], "settings": {"height": 12}}],
+ "viewpoint": {"lens": 32, "film_mm": 36, "far": 2000,
+  "path": {"move": "push", "from": [0, 0, 1.4], "to": [17, 0, 1.4], "pitch": 7, "yaw": 10.7, "ease": "eased35"}},
+ "capture": {"renderer": "raster", "spp": 64, "view": "Standard", "masks": ["eye-on-stalk"]}
+}

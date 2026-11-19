@@ -1,0 +1,15 @@
+{
+ "format": "atomic-flix/scene@1", "name": "picnic-orbit", "seed": 5,
+ "size": {"w": 1152, "h": 640, "fps": 24, "frames": 97},
+ "world": {"sky": {"image": "gen:day", "spin": 0, "brightness": 1.2}, "mist": {"start": 20, "depth": 300}},
+ "lamps": [
+  {"kind": "sun", "name": "key", "color": [1.0, 0.95, 0.86], "power": 4.0, "pitch": -50, "yaw": 135, "soft": 2},
+  {"kind": "sun", "name": "sky", "color": [0.7, 0.8, 1.0], "power": 0.6, "pitch": -70, "yaw": -40, "soft": 40}],
+ "pieces": [
+  {"use": "lawn-picnic", "settings": {"size": 80, "blanket": [2.2, 1.7]}},
+  {"use": "salt-flat", "at": [0, 0, -0.05], "settings": {"size": 3000, "surface": "grass"}},
+  {"use": "figure", "id": "performer", "at": [0.2, -0.3, 0], "turn": 200, "settings": {"anim": "sing", "height": 1.68}}],
+ "viewpoint": {"lens": 35, "film_mm": 36, "far": 1500,
+  "path": {"move": "orbit", "center": [0, 0, 1.0], "radius": 5.5, "height": 1.6, "start": 160, "end": 220, "ease": "eased"}},
+ "capture": {"renderer": "raster", "spp": 32, "masks": ["performer", "lawn-picnic"]}
+}

@@ -1,0 +1,14 @@
+{
+ "name": "lawn-picnic", "version": 1,
+ "summary": "A square of lawn with a gingham picnic blanket at its centre, a basket and a few cups.",
+ "settings": {
+  "size": {"type": "float", "fallback": 40, "min": 2},
+  "blanket": {"type": "vec2", "fallback": [2.0, 1.6], "min": 0.3},
+  "twist": {"type": "float", "fallback": [-12, 12]},
+  "basket": {"type": "bool", "fallback": true},
+  "cups": {"type": "int", "fallback": 2, "min": 0, "max": 8}
+ },
+ "ground_box": [-20, -20, 20, 20], "tags": ["set", "outdoor"],
+ "surfaces": ["grass", "gingham", "wicker", "cup"],
+ "provenance": "hand-written", "rights": "ours"
+}

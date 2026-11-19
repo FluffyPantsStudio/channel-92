@@ -1,0 +1,10 @@
+# Negations (H3, L040).
+never
+not
+no
+without
+don't
+doesn't
+won't
+neither
+nor

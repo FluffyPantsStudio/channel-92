@@ -1,0 +1,21 @@
+# Body parts a vocal render prompt never names (H1): naming them brings them up.
+hand
+hands
+arm
+arms
+finger
+fingers
+wrist
+wrists
+palm
+palms
+fist
+fists
+thumb
+thumbs
+elbow
+elbows
+gesture
+gestures
+gesturing
+gesticulates
