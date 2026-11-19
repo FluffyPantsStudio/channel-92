@@ -24,7 +24,7 @@ The validator reports (full output in `out/atomic-sunshine/dry-run.txt`):
 
 | What | Why | Notes |
 |---|---|---|
-| Stems of the exact take: mix, lead vocal, band (instrumental), drums | `time`, `bars`, every render's audio, the cut's sound | The pack ships instrumental and lead only; ask for a drum stem (the bar's one is weaker without it). |
+| Stems of the exact take: mix, lead vocal, band (instrumental), drums | `time`, `bars`, every render's audio, the cut's sound | Ask for a drum stem if one exists (the bar's one is weaker without it). |
 | The restored master | The mix laid over the final cut | Gate 2 fingerprints the file the person approved; a new master after gate 2 reopens it. |
 | The concept pick | Gate 1 | Three pitches of at most 120 words: premise, the one visual device, the arc, one risk. |
 | The lyric as sung | `time` | Repeats written out, `[Section]` lines, backing in parentheses. |
