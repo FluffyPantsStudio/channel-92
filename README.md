@@ -87,6 +87,7 @@ the package, in `src/atomic_flix/workflows/`.
 | `tools/new_song_checklist.md` | What the person supplies and what the kit does at each gate, for the next song. |
 | `tools/make_fixtures.py synthetic` | Writes the synthetic beat and bar fixtures (drum, band and mix stems plus `truth.json`) to `fixtures/synthetic/`. Deterministic. |
 | `tools/make_fixtures.py first-film` | Copies our first film's stems and timing files to `fixtures/first-film/` (git-ignored) with a manifest of sizes and sha256, and `TRUTH.txt`, what is known about its bars. |
+| `tools/label_words.py FILM` | Writes `analysis/word-labels.json` by running faster-whisper (not a dependency) on the voice stem, so `time` can say which words are where. On Windows without CUDA 12 libraries use `--device cpu`. |
 | `tools/click.py` | Writes a counting click track on a beat list, optionally over the song. |
 | `tools/similarity.py OLD NEW` | Compares two source trees for copied code, prose and naming; prints the distinctive measures that decide PASS and the strict counts beside them. Reads no allow-list. See `docs/clean-room.md` and `docs/shared-vocabulary.md`. |
 
