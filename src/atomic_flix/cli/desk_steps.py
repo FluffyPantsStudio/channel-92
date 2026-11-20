@@ -30,6 +30,8 @@ def _packet(argv: Sequence[str]) -> int:
         packet = build_packet(film.root, args.gate, out=args.out, max_mb=args.max_mb)
     except DeskError as problem:
         raise StepError(str(problem)) from None
+    print(f"built from the ask on record: shown {printable(', '.join(packet.shown))}; question "
+          f"\"{printable(packet.question)}\" (stale? `gate FILM ask {args.gate} --again` before sending anything)")
     print(f"wrote {packet.folder} (send in this order, then ask the card's question):")
     for item in packet.files:
         print(f"  {item.order}. {item.file} ({item.kind}, {item.bytes / 1024 / 1024:.2f} MB): "

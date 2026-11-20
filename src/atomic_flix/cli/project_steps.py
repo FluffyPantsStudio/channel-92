@@ -176,12 +176,17 @@ def _gate(argv: Sequence[str]) -> int:
     p = parser("gate", "Record the person's part at one of the six gates. `ask` records what was shown and the one\n"
                        "question; `answer` records the person's words exactly and how they arrived (typed here, or\n"
                        "relayed with --words; bookkeeping, not proof of who typed: docs/gates.md); `reopen` opens\n"
-                       f"a passed gate again. Gates, in order: {', '.join(GATE_IDS)}.")
+                       "a passed gate again. `ask --again` puts right an open gate (asked, not yet answered) that\n"
+                       "was asked with the wrong thing shown: the new --shown and --question replace the old (left\n"
+                       "out, the old are kept) and the earlier ask stays on record as superseded.\n"
+                       f"Gates, in order: {', '.join(GATE_IDS)}.")
     film_argument(p)
     p.add_argument("action", choices=["show", "ask", "answer", "reopen"])
     p.add_argument("gate", nargs="?", choices=GATE_IDS)
     p.add_argument("--shown", action="append", default=[], help="ask: a file or thing put in front of the person")
     p.add_argument("--question", help="ask: the one question (default: the gate's own)")
+    p.add_argument("--again", action="store_true", help="ask: ask an open gate again, keeping the earlier ask on "
+                                                        "record (after an answer, use reopen)")
     p.add_argument("--by", help="answer: the person's name")
     p.add_argument("--words", help="answer: the person's words, quoted exactly (recorded as relayed); leave it out "
                                    "at a terminal and the person types them (recorded as typed by the person)")
@@ -208,6 +213,9 @@ def _gate(argv: Sequence[str]) -> int:
 
 def _ask(film: Film, args) -> None:
     shown = list(args.shown)
+    if args.again:
+        ask_gate(film.folder, args.gate, shown, at=args.at, question=args.question, again=True)
+        return
     if args.gate == "spend":
         budget = film.path("plan/budget.json")
         if not budget.is_file():

@@ -160,3 +160,23 @@ def test_the_packet_verb_writes_the_folder_and_prints_the_send_order(film, capsy
     out = capsys.readouterr().out
     assert "desk/concept" in out.replace("\\", "/") and "1." in out
     assert main(["packet", str(film), "song"]) == 2
+
+
+def test_packet_prints_what_it_is_built_from_so_a_stale_ask_shows(film, capsys):
+    ask_up_to(film, "concept")
+    assert main(["packet", str(film), "concept"]) == 0
+    out = capsys.readouterr().out
+    assert "pitches.md, plan/structure.md" in out
+    assert "\"Is this the film?\"" in out
+
+
+def test_a_packet_after_asking_again_is_built_from_the_new_ask(film, capsys):
+    ask_up_to(film, "concept")
+    (film / "plot.md").write_text("# The plot\n\nThe moon goes home.\n", encoding="utf-8")
+    assert main(["gate", str(film), "ask", "concept", "--again", "--shown", "plot.md", "--shown",
+                 "plan/structure.md", "--question", "Is this the plot?"]) == 0
+    packet = build_packet(film, "concept")
+    assert packet.shown == ("plot.md", "plan/structure.md") and packet.question == "Is this the plot?"
+    assert "Is this the plot?" in packet.card
+    texts = [item for item in packet.files if item.kind == "text"]
+    assert (packet.folder / texts[0].file).read_text(encoding="utf-8").startswith("# The plot")

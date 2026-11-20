@@ -20,7 +20,10 @@ The main session never carries the review dialogue or the files; it reads that l
 ## The flow
 
 1. The main session gets the gate ready as usual and asks it: `atomic-flix gate FILM ask GATE --shown ...` (gates 5
-   and 6 also need a fresh `eval`). A packet is only made for an asked gate, from what was asked.
+   and 6 also need a fresh `eval`). A packet is only made for an asked gate, from what was asked. `packet` prints
+   the shown files and the question it builds from first, so a stale ask shows; one asked with the wrong thing is
+   put right with `atomic-flix gate FILM ask GATE --again --shown ... --question "..."` before anything is sent
+   (the earlier ask stays on record, `docs/gates.md`), and the packet is built again.
 2. It starts a gate session for that one gate.
 3. The gate session runs `atomic-flix packet FILM GATE`, sends the files in manifest order with captions, then the
    card's question and how to reply.
@@ -46,7 +49,7 @@ AAC at 64 kbps, H.264 at 350 kbps); one that still does not fit is refused by na
 
 | Gate | Files, in order | Card |
 |---|---|---|
-| 1 concept | the song's timeline strip from `analysis/structure.json` (sections sung, mixed and instrumental, story gaps outlined and numbered, times), then the concept document the gate was asked with (the pitches or the plot, a `.md` or `.txt` in `--shown`) as text to send as a message | the question |
+| 1 concept | the song's timeline strip from `analysis/structure.json` (sections sung, mixed and instrumental, story gaps outlined and numbered, times; see below), then the concept document the gate was asked with (the pitches or the plot, a `.md` or `.txt` in `--shown`) as text to send as a message | the question |
 | 2 song | the mix with the click as AAC (`.m4a`; the loud high click is the bar's one: the beat slot and its first time are in the caption and the card), then the timeline strip | the question; where the click puts the one |
 | 3 looks | each still shown at screen size (long side at most 1600 px, JPEG); then six fixed zoom tiles per still at native pixels (three across and two down for a wide still, two across and three down for a tall one, each reaching a little into its neighbours, so together they cover the whole picture); then `plan/look-sample.png` at screen size when it exists | the question |
 | 4 board | numbered contact sheets: each shot's number, time on the song, lines and first frame, at most 6 shots per sheet | the question |
@@ -58,6 +61,14 @@ and `group`. `card.md` has the gate, the one question, what the files are, and e
 words. `card_text` makes sure it holds exactly one question mark, the question's (a fact on the card is a
 statement, so a question mark in one is dropped). Pictures are drawn with the kit's own pixel font through ffmpeg;
 no imaging library is needed.
+
+The timeline strip is 1600 px wide and as tall as it needs. Every label is laid out before anything is drawn
+(`desk/strip.py`, `strip_plan`), so no two labels overlap and none leaves the picture. Section names sit in three
+lanes above the bar with a leader line down to where each section starts, longest sections first; a name with no
+room shrinks to the section's number, and a number with no room is left out (the colour block stays). When any
+name shrank, every name carries its number and a key under the strip lists every section by number, name and start
+time; when all fit there is no key. A story gap's label ("STORY GAP n" or "GAP n", and its seconds) sits inside its
+outline when it fits there whole, else under the times with a leader line up to the outline; it is never cut.
 
 The packet reads only the film's own files: a shown item, a still, a plan task or a review sheet that resolves
 outside the film folder is refused or skipped. Every ffmpeg and ffprobe input goes in with

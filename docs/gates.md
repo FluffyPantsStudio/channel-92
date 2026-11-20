@@ -24,6 +24,21 @@ refused, both when it is made and when `standing.json` is read back.
 A reply typed by the director in the Claude app and taken with `atomic-flix desk` is recorded as `relayed`, and
 `notes.md` adds that it arrived that way (`docs/desk.md`).
 
+## Asking again before the answer
+
+A gate asked with the wrong thing shown (the pitches when the director planned the film and the plot holds it, or
+the wrong question) is put right with `atomic-flix gate FILM ask GATE --again --shown ... --question "..."`, while
+it is still open: asked, with no answer since. The new shown items, question and time replace the old; a
+`--shown` or `--question` left out keeps the old one. The ask it replaces is not deleted: it stays in the gate's
+record in `standing.json` under `superseded` (what was shown, the question, when it was asked, when it was
+replaced), and `progress` names it. The machine's rules hold as for any ask: earlier gates must have passed, gate 6
+needs a clean cold review of the cut shown, gates 5 and 6 need a fresh eval, and a re-ask dated before the ask it
+replaces is refused. An answer dated before the new ask is refused.
+
+`--again` is refused, in a plain sentence, when the gate has passed (reopen it, then ask), when the person answered
+the last question (that answer stays; ask with plain `ask`), and when the gate was never asked (plain `ask`). A
+plain `ask` on an open gate is refused and points at `--again`.
+
 ## The limit: this is bookkeeping, not authentication
 
 A program cannot prove who typed. `person-direct` only means the words came in on a terminal the command was

@@ -43,6 +43,8 @@ class Packet:
     files: tuple[PacketFile, ...]
     card: str
     notes: tuple[str, ...] = ()
+    shown: tuple[str, ...] = ()     # what the gate's ask on record showed, which the packet is built from
+    question: str = ""              # and its question
 
 
 def _context(root: Path, gate: str) -> tuple[GateContext, str]:
@@ -148,4 +150,4 @@ def build_packet(root: Path | str, gate: str, *, out: Path | str | None = None,
         raise
     finally:
         shutil.rmtree(sink.work, ignore_errors=True)
-    return Packet(gate, folder, files, card, tuple(sink.notes))
+    return Packet(gate, folder, files, card, tuple(sink.notes), ctx.shown, question)

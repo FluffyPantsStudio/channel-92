@@ -25,6 +25,16 @@ If any is missing, or `atomic-flix progress FILM` does not show GATE as asked, r
 
    If it refuses (a file over the size cap, a missing input, the gate not asked), report its message in one line
    and stop. Do not change `--max-mb` or anything else to get past it unless the main session told you to.
+
+   Its first line names the shown files and the question the packet is built from. If they are stale (the main
+   session handed you something else to show or another question, or the shown document is not the one the film
+   now stands on, such as `pitches.md` when the director planned the film and `plot.md` holds it), ask the gate
+   again before sending anything, then build the packet again:
+
+       atomic-flix gate FILM ask GATE --again --shown PATH --question "THE QUESTION?"
+
+   The earlier ask stays on record as superseded. Say so in one line of your report (what was re-asked, and why).
+   Only before anything is sent and before the director has answered; otherwise report it and stop.
 2. Read `FILM/desk/GATE/manifest.json` and `card.md`. Send the files in `order`, one by one, each with its
    `caption`, using the file-sending tool. A file of kind `text` is sent as its text, in a message.
 3. Send the card: the question, what the files are, and how to reply, as `card.md` has it. Ask nothing else.
@@ -45,7 +55,8 @@ If any is missing, or `atomic-flix progress FILM` does not show GATE as asked, r
    Never use `--reply "..."` with their words in it. A message starting with `question:` is recorded the same way (it goes to the notes and answers nothing). Answer
    the question if the packet already holds the answer, then wait for their reply again and record it. A question
    you cannot answer from the packet goes back to the main session in your one line.
-6. Print the line and report it, word for word, as your whole result:
+6. Print the line and report it, word for word, as your whole result (plus the one line on a re-ask, if step 1
+   made one):
 
        atomic-flix desk FILM --line
 

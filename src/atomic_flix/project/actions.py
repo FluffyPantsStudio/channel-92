@@ -81,13 +81,15 @@ def _answer_block(standing: Standing, gate: str, answer: Answer) -> str:
 
 
 def ask_gate(film: FilmFolder | Path, gate: str, shown: Sequence[str], *, at: str | None = None,
-             question: str | None = None) -> Standing:
+             question: str | None = None, again: bool = False) -> Standing:
     """Record that SHOWN was put to the person at GATE with one question. Gates 5 and 6 are also refused while the
-    film's eval report is missing, stale or BLOCKED for that gate (`atomic-flix eval`, docs/eval.md)."""
+    film's eval report is missing, stale or BLOCKED for that gate (`atomic-flix eval`, docs/eval.md). AGAIN asks an
+    open gate again, the earlier ask kept as superseded (SHOWN empty or QUESTION None keep the earlier ones)."""
     folder = _folder(film)
     standing = load_standing(folder)
-    updated = replace(standing, gates=standing.gates.ask(gate, shown, at=at or now_text(), question=question))
-    require_eval(folder.root, gate, shown)
+    book = standing.gates.ask(gate, shown, at=at or now_text(), question=question, again=again)
+    updated = replace(standing, gates=book)
+    require_eval(folder.root, gate, book.record(gate).shown)
     save_standing(folder, updated)
     return updated
 
@@ -218,6 +220,10 @@ def where_it_stands(film: FilmFolder | Path) -> str:
                      f"({record.state}).")
         lines.append(f"Shows: {', '.join(record.shown) if record.shown else upcoming.shows}")
         lines.append(f"Asks: \"{record.question or upcoming.question}\"")
+        if record.state == "asked" and record.superseded:
+            past = record.superseded[-1]
+            lines.append(f"Asked again at {record.asked_at}; the ask it replaced ({', '.join(past.shown)}, "
+                         f"\"{past.question}\") stays in standing.json as superseded.")
     passed = [f"{r.spec.number} {r.spec.title} ({r.latest.at[:10]}, {arrival(r.latest)})"
               for r in book.records if r.state == "passed"]
     lines.append("Passed: " + ("; ".join(passed) if passed else "none yet"))

@@ -3,39 +3,26 @@ the song's timeline strip, the fixed zoom tiles of a still, and the board's cont
 
 from __future__ import annotations
 
-import string
 from dataclasses import dataclass
 from typing import Sequence
 
 import numpy as np
 
 from ..review.canvas import Tile, compose, text_image
+from .strip import GAP_EDGE, LOW_PITCH, SCALE, SWATCH, TEXT_H, Label, StripPlan, clock, font_text, strip_plan
 
 SCREEN_LONG_SIDE = 1600          # a still as a phone shows it
 SHEET_LONG_SIDE = 2400           # a review or contact sheet, zoomed on the phone
 TILE_OVERLAP = 0.08              # each zoom tile reaches this share of its size into its neighbours
-STRIP_SIZE = (1600, 360)
+STRIP_SIZE = (1600, 360)          # the width; the height grows with what the strip must hold
 THUMB_WIDTH = 760
 SHOTS_PER_SHEET = 6
 SHEET_COLUMNS = 2
-FONT = set(string.ascii_uppercase + string.digits + ".-:/+%_><=()# ")
 BACKGROUND = (22, 22, 26)
 INK = (235, 235, 235)
 DIM = (150, 150, 160)
 KIND_COLOURS = {"sung": (232, 168, 56), "mixed": (196, 120, 176), "instrumental": (64, 76, 98)}
 GAP_COLOUR = (90, 210, 225)
-
-
-def font_text(text: str) -> str:
-    """TEXT as the pixel font can draw it: upper case, characters it lacks dropped, spaces collapsed."""
-    kept = "".join(char if char in FONT else ("" if char in "'`" else " ") for char in str(text).upper())
-    return " ".join(kept.split())
-
-
-def clock(seconds: float, tenths: bool = False) -> str:
-    """Seconds as M:SS (or M:SS.s)."""
-    minutes, rest = divmod(max(0.0, float(seconds)), 60.0)
-    return f"{int(minutes)}:{rest:04.1f}" if tenths else f"{int(minutes)}:{int(rest):02d}"
 
 
 def fit_size(width: int, height: int, long_side: int) -> tuple[int, int]:
@@ -97,55 +84,41 @@ def _outline(canvas: np.ndarray, box: tuple[int, int, int, int], colour, edge: i
         _block(canvas, side, colour)
 
 
-def _tick_step(total_s: float) -> int:
-    for step in (5, 10, 15, 30, 60):
-        if total_s / step <= 12:
-            return step
-    return 120
+def _leader(canvas: np.ndarray, label: Label, colour) -> None:
+    """The leader line from LABEL to what it names; a short run under the label when the line starts beside it."""
+    x, top, bottom = label.leader
+    _block(canvas, (x, min(top, bottom), x + 2, max(top, bottom)), colour)
+    left, _, right, _ = label.box
+    if not left <= x <= right and top < bottom:
+        _block(canvas, (min(x, right), top, max(x + 2, left), top + 2), colour)
 
 
-@dataclass(frozen=True)
-class StripLayout:
-    width: int
-    left: int = 24
-    right: int = 24
-    bar_top: int = 132
-    bar_bottom: int = 246
-
-    def x(self, seconds: float, total_s: float) -> int:
-        span = self.width - self.left - self.right
-        return self.left + int(round(span * min(max(seconds, 0.0), total_s) / total_s))
-
-
-def _sections(canvas: np.ndarray, layout: StripLayout, sections: Sequence[dict], total_s: float) -> None:
-    for number, section in enumerate(sections):
-        left, right = layout.x(section["start"], total_s), layout.x(section["end"], total_s)
+def _section_blocks(canvas: np.ndarray, plan: StripPlan, sections: Sequence[dict]) -> None:
+    for section in sections:
+        left, right = plan.x(section["start"]), plan.x(section["end"])
         colour = KIND_COLOURS.get(section.get("kind"), KIND_COLOURS["instrumental"])
-        _block(canvas, (left, layout.bar_top, max(left + 1, right - 2), layout.bar_bottom), colour)
-        label_y = 64 if number % 2 == 0 else 98
-        text = f"{section.get('label') or section.get('id')} {clock(section['start'])}"
-        _ink(canvas, text, left + 2, label_y, 3, INK, max_width=max(8, 2 * (right - left)))
-        _block(canvas, (left, label_y + 18, left + 2, layout.bar_top), DIM)
+        _block(canvas, (left, plan.bar_top, max(left + 1, right - 2), plan.bar_bottom), colour)
 
 
-def _gaps(canvas: np.ndarray, layout: StripLayout, gaps: Sequence[dict], total_s: float) -> None:
+def _gap_outlines(canvas: np.ndarray, plan: StripPlan, gaps: Sequence[dict]) -> None:
     for gap in gaps:
-        left, right = layout.x(gap["start"], total_s), layout.x(gap["end"], total_s)
-        _outline(canvas, (left, layout.bar_top - 6, max(left + 9, right), layout.bar_bottom + 6), GAP_COLOUR)
-        room = max(8, right - left - 10)
-        rank = gap.get("rank", "")
-        name = f"STORY GAP {rank}" if len(f"STORY GAP {rank}") * 12 <= room else f"GAP {rank}"
-        _ink(canvas, name, left + 8, layout.bar_top + 10, 3, INK, max_width=room)
-        if gap.get("duration_s") is not None:
-            _ink(canvas, f"{float(gap['duration_s']):.0f} S", left + 8, layout.bar_top + 34, 3, INK, max_width=room)
+        left = plan.x(gap["start"])
+        right = max(left + 9, plan.x(gap["end"]))
+        _outline(canvas, (left, plan.bar_top - GAP_EDGE, right, plan.bar_bottom + GAP_EDGE), GAP_COLOUR)
 
 
-def _ticks(canvas: np.ndarray, layout: StripLayout, total_s: float) -> None:
-    step = _tick_step(total_s)
-    for second in range(0, int(total_s) + 1, step):
-        x = layout.x(second, total_s)
-        _block(canvas, (x, layout.bar_bottom + 8, x + 2, layout.bar_bottom + 20), DIM)
-        _ink(canvas, clock(second), x + 6, layout.bar_bottom + 12, 3, DIM)
+def _label(canvas: np.ndarray, label: Label) -> None:
+    left, top = label.box[0], label.box[1]
+    if label.kind == "key":
+        _block(canvas, (left, top - 1, left + SWATCH, top + TEXT_H + 1), KIND_COLOURS.get(label.swatch, DIM))
+        left += SWATCH + 8
+    elif label.kind == "time":
+        x, tick_top, tick_bottom = label.leader
+        _block(canvas, (x, tick_top, x + 2, tick_bottom), DIM)
+    elif label.leader is not None:
+        _leader(canvas, label, GAP_COLOUR if label.kind == "gap" else DIM)
+    for row, line in enumerate(label.lines):
+        _ink(canvas, line, left, top + row * LOW_PITCH, SCALE, DIM if label.kind == "time" else INK)
 
 
 def _legend(canvas: np.ndarray, y: int) -> None:
@@ -157,19 +130,16 @@ def _legend(canvas: np.ndarray, y: int) -> None:
 
 
 def timeline_strip(structure: dict, title: str) -> np.ndarray:
-    """The song's sections in time (sung, mixed, instrumental), story gaps outlined and labelled, times below."""
-    width, height = STRIP_SIZE
-    canvas = np.full((height, width, 3), BACKGROUND, np.uint8)
-    sections = list(structure.get("sections") or [])
-    total_s = float(structure.get("song_s") or (sections[-1]["end"] if sections else 0.0))
-    if total_s <= 0 or not sections:
-        raise ValueError("the structure has no sections")
-    layout = StripLayout(width)
-    _ink(canvas, f"{title}  {clock(total_s)}", 24, 16, 4, INK)
-    _sections(canvas, layout, sections, total_s)
-    _gaps(canvas, layout, (structure.get("pacing") or {}).get("story_gaps") or [], total_s)
-    _ticks(canvas, layout, total_s)
-    _legend(canvas, height - 44)
+    """The song's sections in time (sung, mixed, instrumental), story gaps outlined and labelled, times below; where
+    names crowd, numbers and a key under the strip (`strip.strip_plan` lays every label out first)."""
+    plan = strip_plan(structure, STRIP_SIZE[0])
+    canvas = np.full((plan.height, plan.width, 3), BACKGROUND, np.uint8)
+    _ink(canvas, f"{title}  {clock(plan.total_s)}", 24, 16, 4, INK)
+    _section_blocks(canvas, plan, structure["sections"])
+    _gap_outlines(canvas, plan, (structure.get("pacing") or {}).get("story_gaps") or [])
+    for label in plan.labels:
+        _label(canvas, label)
+    _legend(canvas, plan.legend_y)
     return canvas
 
 

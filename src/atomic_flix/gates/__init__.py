@@ -5,13 +5,13 @@ prompts and render time, and v1. The kit refuses to go past a gate without the p
 """
 
 from .clock import now_text, parse_time
-from .machine import (PERSON, PERSON_DIRECT, PROVENANCES, RELAYED, SCOPES, Answer, GateBook, GateRecord,
+from .machine import (PERSON, PERSON_DIRECT, PROVENANCES, RELAYED, SCOPES, Answer, GateBook, GateRecord, PastAsk,
                       reads_as_machine)
 from .review import ReviewLoop, ReviewRound
 from .steps import GATE_IDS, GATES, GateRefused, GateSpec, gate_spec
 
 __all__ = [
     "GATES", "GATE_IDS", "PERSON", "PERSON_DIRECT", "PROVENANCES", "RELAYED", "SCOPES", "Answer", "GateBook",
-    "GateRecord", "GateRefused", "GateSpec", "ReviewLoop", "ReviewRound", "gate_spec", "now_text", "parse_time",
+    "GateRecord", "GateRefused", "GateSpec", "PastAsk", "ReviewLoop", "ReviewRound", "gate_spec", "now_text", "parse_time",
     "reads_as_machine",
 ]
