@@ -22,9 +22,12 @@ class GateSpec:
 
 GATES: tuple[GateSpec, ...] = (
     GateSpec("concept", 1, "concept",
-             "three pitches of at most 120 words each: premise, the one visual device every shot carries, "
-             "the arc, one risk",
-             "Which pitch is the film?"),
+             "the concept in one of two forms: three pitches of at most 120 words each (premise, the one "
+             "visual device every shot carries, the arc, one risk), or, when the person has already planned "
+             "the film, their plot as they told it, with their rulings; shown together with the song's structure "
+             "(plan/structure.md from `atomic-flix structure`: its sections, sung and instrumental, and the story "
+             "gaps the pictures must carry)",
+             "Is this the film?"),
     GateSpec("song", 2, "the song, by ear",
              "the song itself, played to the person with a click on the bar's one; never a description or a "
              "measurement of it",

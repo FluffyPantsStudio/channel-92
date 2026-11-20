@@ -1,6 +1,7 @@
-"""`atomic-flix`: one command for a whole film, verb by verb, each reading and writing the film's own folder.
+"""Channel 92: a free kit for cinematic music films. One command for a whole film, verb by verb, each reading and
+writing the film's own folder. The command is `channel92`; `atomic-flix` is the same command under its first name.
 
-    atomic-flix VERB [ARGS]       atomic-flix VERB --help for each verb's own help
+    channel92 VERB [ARGS]         channel92 VERB --help for each verb's own help (atomic-flix VERB works the same)
 
 Film verbs in the order a film meets them, then the stage modules by name (their own command lines).
 """
@@ -10,12 +11,14 @@ from __future__ import annotations
 import sys
 from typing import Callable, Sequence
 
-from . import cut_steps, eval_steps, grade_steps, project_steps, shoot_steps, sound_steps
+from . import (cut_steps, desk_steps, eval_steps, finish_steps, grade_steps, prereq_steps, project_steps, setup_steps,
+               shoot_steps, sound_steps, structure_steps)
 from .common import StepError
 
 Handler = Callable[[Sequence[str]], int]
-FILM_ORDER = ("new", "progress", "gate", "time", "bars", "plan", "lint", "budget", "eval", "shoot", "place", "cut",
-              "grade", "review", "compare")
+FILM_ORDER = ("new", "progress", "gate", "packet", "desk", "structure", "choose", "time", "bars", "plan", "lint",
+              "budget", "eval", "shoot", "place", "cut",
+              "grade", "review", "finish", "compare")
 
 
 def _load_stage(name: str) -> Handler:
@@ -32,6 +35,7 @@ def _plan(argv: Sequence[str]) -> int:
               "slice, steps, gated voice and soft copy, and write the render and still prompts into plan/.\n"
               "Reads film.json, shots.txt, analysis/voice-lines.json and analysis/pulse.json.")
         return 0
+    setup_steps.require_aspect_of(argv)
     return _load_stage("plan")(argv)
 
 
@@ -56,14 +60,17 @@ def _folder_verbs(argv: Sequence[str]) -> int:
 
 
 STEPS: dict[str, tuple[str, Handler]] = {
-    **project_steps.COMMANDS, **sound_steps.COMMANDS, **shoot_steps.COMMANDS, **eval_steps.COMMANDS,
+    **project_steps.COMMANDS, **desk_steps.COMMANDS, **structure_steps.COMMANDS, **setup_steps.COMMANDS,
+    **sound_steps.COMMANDS, **shoot_steps.COMMANDS, **eval_steps.COMMANDS,
     "plan": ("plan cuts on the bar, each shot's slice, gated voice and prompts (plan/)", _plan),
     "cut": (cut_steps.COMMANDS["cut"][0], _either(cut_steps.COMMANDS["cut"][1], "cut", ("audit", "encode", "flash"))),
     "grade": (grade_steps.COMMANDS["grade"][0],
               _either(grade_steps.COMMANDS["grade"][1], "grade", ("measure", "apply"))),
     "review": (cut_steps.COMMANDS["review"][0],
                _either(cut_steps.COMMANDS["review"][1], "review", ("boards", "frames"))),
+    **finish_steps.COMMANDS,
     "compare": cut_steps.COMMANDS["compare"],
+    **prereq_steps.COMMANDS,
 }
 
 MODULES: dict[str, tuple[str, Handler]] = {
@@ -77,7 +84,7 @@ MODULES: dict[str, tuple[str, Handler]] = {
 
 
 def overview() -> str:
-    lines = [__doc__.strip(), "", "Film verbs:"]
+    lines = [__doc__.strip(), "", f"Before the first film:\n  {'setup':<9} {STEPS['setup'][0]}", "", "Film verbs:"]
     lines += [f"  {verb:<9} {STEPS[verb][0]}" for verb in FILM_ORDER]
     lines += ["", "Stage modules (the film verbs `plan` to `compare` above are modules too):"]
     lines += [f"  {name:<9} {about}" for name, (about, _) in MODULES.items()]

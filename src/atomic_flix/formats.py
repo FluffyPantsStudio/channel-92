@@ -16,11 +16,11 @@ PREFIX = "atomic-flix/"
 # kind -> version. The file each kind names is listed in docs/formats.md.
 VERSIONS: dict[str, int] = {
     "film": 1, "standing": 1, "job": 1, "job-log-row": 1, "machine-log-row": 1, "budget": 1,
-    "voice-lines": 1, "word-labels": 1, "pulse": 1, "swells": 1, "cuts": 1, "task": 1, "fit": 1,
+    "voice-lines": 1, "word-labels": 1, "pulse": 1, "swells": 1, "structure": 1, "cuts": 1, "task": 1, "fit": 1,
     "edit": 1, "audit": 1, "strobe": 1, "tone": 1, "review": 1,
     "scene": 1, "scene-plan": 1, "scene-lock": 1, "scene-job": 1, "viewpoint": 1, "capture": 1, "controls": 1,
     "graph-meta": 1, "graph-map": 1, "fixture-truth": 1, "fixture-manifest": 1, "replay": 1,
-    "eval": 1, "rules-map": 1,
+    "eval": 1, "rules-map": 1, "packet": 1, "director": 1,
 }
 
 

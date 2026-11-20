@@ -6,7 +6,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from .media import ENCODER_EXE, run_ffmpeg
+from .media import ENCODER_EXE, input_args, run_ffmpeg
 
 PEAK_CEILING_DB = -1.0
 QUIET_WARNING_LUFS = -16.0
@@ -33,7 +33,7 @@ def measure_loudness(path, *, start: float | None = None, seconds: float | None 
     if seconds is not None:
         command += ["-t", f"{seconds:.6f}"]
     chain = ",".join(part for part in (filters, "ebur128=peak=sample") if part)
-    command += ["-i", str(path), "-vn", "-af", chain, "-f", "null", "-"]
+    command += [*input_args(path), "-vn", "-af", chain, "-f", "null", "-"]
     log = run_ffmpeg(command, f"measure the loudness of {path}").stderr
     summary = log[log.rfind("Summary:"):] if "Summary:" in log else log
     integrated = _INTEGRATED.findall(summary)

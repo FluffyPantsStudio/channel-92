@@ -32,7 +32,8 @@ def _new(tmp_path: Path) -> Path:
     mix = tmp_path / "mix.wav"
     mix.write_bytes(b"RIFF fake")
     film = tmp_path / "films" / "sunny"
-    assert main(["new", str(film), "--song", str(mix)]) == 0
+    assert main(["new", str(film), "--song", str(mix), "--aspect", "16:9", "--by", "Test Person",
+                 "--words", "wide"]) == 0
     return film
 
 

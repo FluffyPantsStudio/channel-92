@@ -13,6 +13,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Mapping, Sequence
 
+from ..brand.logo import png_size
 from ..plan import Line, Pulse, ShotSpec, lines_from_json, parse_shot_list, pulse_from_json
 from ..runner.names import KIT_MAPS
 from ..runner.places import film_file, inside
@@ -27,6 +28,7 @@ class Book:
     prompts: dict[str, str] = field(default_factory=dict)
     still_prompts: dict[str, str] = field(default_factory=dict)
     keyframes: dict[str, dict] = field(default_factory=dict)
+    pictures: dict[str, tuple[int, int]] = field(default_factory=dict)
     lines: dict[str, Line] = field(default_factory=dict)
     pulse: Pulse | None = None
     cuts: list[dict] = field(default_factory=list)
@@ -122,8 +124,10 @@ def book_from_case(case: Mapping) -> Book:
         pulse = Pulse(beats=tuple(data["beats"]), downbeat_slot=data.get("downbeat_slot", 0),
                       grounds=MappingProxyType(dict(data.get("grounds", {}))))
     lines = {row["key"]: _line(row) for row in case.get("lines", [DEFAULT_LINE])}
+    pictures = {key: (int(size[0]), int(size[1])) for key, size in case.get("pictures", {}).items()}
     return Book(film=film, shots=shots, tasks=tasks, prompts=prompts, still_prompts=still_prompts, keyframes=keyframes,
-                lines=lines, pulse=pulse, cuts=list(case.get("cuts", [])), ends_at=case.get("ends_at"),
+                pictures=pictures, lines=lines, pulse=pulse, cuts=list(case.get("cuts", [])),
+                ends_at=case.get("ends_at"),
                 sung_db=case.get("sung_db"), song_sha256=case.get("song_sha256"),
                 graphs=dict(case.get("graphs", {})), batch=dict(case.get("batch", {})),
                 files=frozenset(case["files"]) if "files" in case else None)
@@ -154,6 +158,20 @@ def sha256_of(path: Path) -> str | None:
     return digest.hexdigest()
 
 
+def still_size(root: Path, still: str) -> tuple[int, int] | None:
+    """(width, height) of a shot's first-frame PNG in the film folder, or None when there is none to read."""
+    try:
+        path = film_file(root, still, "still")
+    except TemplateError:
+        return None
+    if not path.is_file() or path.suffix.lower() != ".png":
+        return None
+    try:
+        return png_size(path)
+    except ValueError:
+        return None
+
+
 def graph_sidecar(root: Path, graph: object) -> Path:
     """The `.meta.json` beside a task's graph, which lies in the film folder or the kit's graphs; TemplateError when
     the graph is not a path or lies anywhere else."""
@@ -181,7 +199,7 @@ def load_book(root: Path) -> Book:
     plan_dir = root / "plan"
     tasks = {shot.key: _read(plan_dir / f"{shot.key}.task.json") for shot in shots}
     tasks = {key: task for key, task in tasks.items() if task is not None}
-    prompts, still_prompts, keyframes, graphs = {}, {}, {}, {}
+    prompts, still_prompts, keyframes, graphs, pictures = {}, {}, {}, {}, {}
     for shot in shots:
         prompt_file = plan_dir / f"{shot.key}.prompt.txt"
         still = plan_dir / f"{shot.key}.still-prompt.txt"
@@ -192,6 +210,9 @@ def load_book(root: Path) -> Book:
         record = _read(root / "stills" / f"{shot.key}.json")
         if record is not None:
             keyframes[shot.key] = record
+        size = still_size(root, shot.still_path)
+        if size is not None:
+            pictures[shot.key] = size
     for task in tasks.values():
         graph = task.get("graph")
         if graph and graph not in graphs:
@@ -199,7 +220,7 @@ def load_book(root: Path) -> Book:
     mix = (film.get("stems") or {}).get("mix")
     rules_dir = root / "rules"
     return Book(film=film, shots=shots, tasks=tasks, prompts=prompts, still_prompts=still_prompts, keyframes=keyframes,
-                lines=lines, pulse=pulse, cuts=(_read(plan_dir / "cuts.json") or {}).get("cuts", []),
+                pictures=pictures, lines=lines, pulse=pulse, cuts=(_read(plan_dir / "cuts.json") or {}).get("cuts", []),
                 ends_at=film.get("ends_at"), sung_db=voice_lines.get("sung_db"),
                 song_sha256=sha256_of(film_file(root, mix, "stems.mix")) if mix else None, graphs=graphs,
                 batch=dict(film.get("batch") or {}), root=root, rules_dir=rules_dir if rules_dir.exists() else None)

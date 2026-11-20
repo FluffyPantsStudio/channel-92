@@ -19,6 +19,10 @@ LYRIC_FILE = "lyric.txt"
 NOTES_FILE = "notes.md"
 STANDING_FILE = "standing.json"
 JOB_LOG_FILE = "job-log.jsonl"
+STRUCTURE_FILE = "analysis/structure.json"      # `structure`: sections, story gaps, pacing
+PULSE_FILE = "analysis/pulse.json"              # `bars`: beats and the bar's one
+VOICE_LINES_FILE = "analysis/voice-lines.json"  # `time`: every sung line
+STRUCTURE_PAGE_FILE = "plan/structure.md"       # `structure`: the page gate 1 shows
 
 FOLDERS: tuple[tuple[str, str], ...] = (
     ("audio", "the song and its stems: mix, voice, band, drums, choir"),

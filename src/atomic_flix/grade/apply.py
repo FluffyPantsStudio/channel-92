@@ -12,7 +12,8 @@ from typing import Sequence
 
 import numpy as np
 
-from ..cut.media import ERROR_TAIL, ENCODER_EXE, MediaError, probe
+from ..cut.media import ERROR_TAIL, ENCODER_EXE, STDIN_ONLY, MediaError, input_args, probe
+from ..programs import command_of
 from .correct import IDENTITY, Correction, Look, grade_planes, luma_table, tint_tables
 from .measure import ShotSpan
 
@@ -27,8 +28,8 @@ def _frame_owner(shots: Sequence[ShotSpan], count: int) -> np.ndarray:
 
 def _encoder(out: Path, provenance: Path, size: tuple[int, int], fps: float, crf: int, x264_speed: str) -> list[str]:
     width, height = size
-    return [ENCODER_EXE, "-y", "-v", "error", "-nostdin", "-f", "rawvideo", "-pix_fmt", "yuv420p",
-            "-s", f"{width}x{height}", "-r", f"{fps:g}", "-i", "-", "-i", str(provenance),
+    return [ENCODER_EXE, "-y", "-v", "error", "-nostdin", *STDIN_ONLY, "-f", "rawvideo", "-pix_fmt", "yuv420p",
+            "-s", f"{width}x{height}", "-r", f"{fps:g}", "-i", "-", *input_args(provenance),
             "-map", "0:v", "-map", "1:a?", "-c:a", "copy", "-c:v", "libx264", "-preset", x264_speed, "-crf", str(crf),
             "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(out)]
 
@@ -49,11 +50,11 @@ def write_graded(cut: Path | str, out: Path | str, shots: Sequence[ShotSpan], co
     luma_bytes, chroma_bytes = width * height, (width // 2) * (height // 2)
     out.parent.mkdir(parents=True, exist_ok=True)
     partial = out.with_name(out.stem + ".partial" + out.suffix)
-    decoder = subprocess.Popen([ENCODER_EXE, "-v", "error", "-nostdin", "-i", str(cut), "-fps_mode", "passthrough",
-                                "-f", "rawvideo", "-pix_fmt", "yuv420p", "-"], stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
-    encoder = subprocess.Popen(_encoder(partial, cut, (width, height), info.fps, crf, x264_speed), stdin=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+    decoder = subprocess.Popen(command_of([ENCODER_EXE, "-v", "error", "-nostdin", *input_args(cut),
+                                           "-fps_mode", "passthrough", "-f", "rawvideo", "-pix_fmt", "yuv420p", "-"]),
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    encoder = subprocess.Popen(command_of(_encoder(partial, cut, (width, height), info.fps, crf, x264_speed)),
+                               stdin=subprocess.PIPE, stderr=subprocess.PIPE)
     frame = 0
     try:
         while True:

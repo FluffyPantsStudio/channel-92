@@ -42,8 +42,15 @@ def read_film(folder: FilmFolder) -> dict[str, Any]:
     return data
 
 
+LINE_ENDS = ("\r\n", "\r", " ", " ")
+
+
 def quote(words: str) -> str:
-    """WORDS as a Markdown quote, every line kept exactly, so the notes hold them word for word."""
+    """WORDS as a Markdown quote, every line kept exactly, so the notes hold them word for word. Every kind of line
+    end (Windows, old Mac, the Unicode line and paragraph separators) starts a new quoted line, so no line of the
+    words can escape the quote."""
+    for end in LINE_ENDS:
+        words = words.replace(end, "\n")
     return "".join(f"> {line}\n" if line else ">\n" for line in words.split("\n"))
 
 

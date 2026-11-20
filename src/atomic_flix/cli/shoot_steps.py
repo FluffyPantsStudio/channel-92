@@ -27,6 +27,7 @@ from ..runner.jobs import RUNNING, UNKNOWN, WAITING
 from ..runner.sched import headroom_floor
 from ..runner.template import TemplateError
 from .common import Film, StepError, film_argument, parser, read_json, write_json
+from .setup_steps import require_aspect
 
 BUDGET = "plan/budget.json"
 DEFAULT_HOSTS = "127.0.0.1:8188,127.0.0.1:8189"
@@ -177,7 +178,7 @@ def pending_jobs(film_root: Path, keys: Sequence[str] | None = None) -> list[dic
 
 
 def clear_to_shoot(film: Film, keys: Sequence[str] | None = None):
-    """Refuse (StepError) unless gate 5 holds the person's yes, every planned job was planned under that yes, the eval
+    """Refuse (StepError) unless gate 5 holds the person's yes, the director has chosen the aspect, every planned job was planned under that yes, the eval
     report is fresh and not BLOCKED for gate 5 (only gate 5's own ask, answer and batch may have changed since), and
     lint is clear; return the checked lint book. Both `shoot` command lines call this first."""
     try:
@@ -185,6 +186,7 @@ def clear_to_shoot(film: Film, keys: Sequence[str] | None = None):
         standing = load_standing(film.folder)
     except (GateRefused, ProjectError) as problem:
         raise StepError(str(problem)) from None
+    require_aspect(film)
     approved = standing.batch.at if standing.batch is not None else None
     strays = [f"{job['key']} r{job['n']:03d}" for job in pending_jobs(film.root, keys)
               if job["state"] == WAITING and job.get("approval") != approved]

@@ -4,6 +4,9 @@ reviewer) and `compare` (the film against the first one).
 `cut` writes the edit it renders as `cuts/vNN.edit.json`, so a person can read exactly what went in: each shot's
 pick, its placement map, and the song. Picks come from film.json `chosen` (the person's); a shot with exactly one
 placed render uses it and says so; a shot with several and no pick stops the cut.
+
+The cut stays clean: no logo, no look, no intro. `finish` lays those on after `grade`, so the grade never sees
+them (`finish_steps.py`).
 """
 
 from __future__ import annotations

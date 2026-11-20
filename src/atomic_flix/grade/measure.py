@@ -18,7 +18,8 @@ from typing import Iterable, Sequence
 
 import numpy as np
 
-from ..cut.media import ERROR_TAIL, ENCODER_EXE, SCALE_FLAGS, MediaError
+from ..cut.media import ERROR_TAIL, ENCODER_EXE, SCALE_FLAGS, MediaError, input_args
+from ..programs import command_of
 
 SAMPLE_SIZE = (160, 90)
 SAMPLES_PER_SECOND = 2
@@ -68,9 +69,10 @@ def small_frames(film: Path | str, wanted: Iterable[int], size=SAMPLE_SIZE) -> d
     keep = set(int(i) for i in wanted)
     width, height = size
     plane = width * height
-    command = [ENCODER_EXE, "-v", "error", "-nostdin", "-i", str(film), "-vf", f"scale={width}:{height}:flags={SCALE_FLAGS}",
+    command = [ENCODER_EXE, "-v", "error", "-nostdin", *input_args(film),
+               "-vf", f"scale={width}:{height}:flags={SCALE_FLAGS}",
                "-fps_mode", "passthrough", "-f", "rawvideo", "-pix_fmt", "yuv444p", "-"]
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(command_of(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     found: dict[int, np.ndarray] = {}
     index = 0
     last = max(keep) if keep else -1

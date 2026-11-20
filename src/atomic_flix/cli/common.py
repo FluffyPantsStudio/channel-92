@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from ..plan import PlanError, ShotSpec, parse_shot_list
+from ..programs import guard_film
 from ..project import FilmFolder, ProjectError, read_film
 from ..project.standing import write_atomic
 from ..formats import stamped
@@ -33,6 +34,7 @@ class Film:
         folder = FilmFolder(Path(root))
         if not folder.film.is_file():
             raise StepError(f"{folder.root} is not a film folder (no film.json); make one with `atomic-flix new`")
+        guard_film(folder.root)       # no program inside a film folder is ever run (programs.py)
         try:
             return cls(folder, read_film(folder))
         except ProjectError as problem:

@@ -10,10 +10,12 @@ from typing import Sequence
 
 import numpy as np
 
-from ..barmap import pulse
-from ..cut.media import ENCODER_EXE, ERROR_TAIL
+from ..barmap import Pulse, pulse
+from ..cut.media import ENCODER_EXE, ERROR_TAIL, input_args
 from ..place import check_fit, fit_by_sound
-from ..timing import load_labels, time_lines, write_timing
+from ..programs import command_of
+from ..project.layout import VOICE_LINES_FILE as VOICE_LINES
+from ..timing import Timing, load_labels, time_lines, write_timing
 from ..wav import WavError, read_wav
 from .common import Film, StepError, film_argument, parser, write_json
 
@@ -33,26 +35,40 @@ def _mono(samples: np.ndarray) -> np.ndarray:
     return samples.mean(axis=1) if samples.ndim == 2 else samples
 
 
-def _time(argv: Sequence[str]) -> int:
-    p = parser("time", "Time every sung line from the voice stem's level and write analysis/voice-lines.json.\n"
-                       "Word labels in analysis/word-labels.json (when present) only say which words are where.\n"
-                       "film.json vocal_patches [start, end] win over what is measured.")
-    film_argument(p)
-    film = Film.open(p.parse_args(argv).film)
+def lyric_path(film: Film) -> Path:
+    return film.path(film.data.get("lyric") or "lyric.txt")
+
+
+def lyric_text(film: Film) -> str:
+    """The film's lyric as sung, or "" when there is none."""
+    lyric = lyric_path(film)
+    return lyric.read_text(encoding="utf-8") if lyric.is_file() else ""
+
+
+def measure_lines(film: Film) -> tuple[Timing, Path]:
+    """The `time` machinery: every line timed on the voice stem, written to analysis/voice-lines.json."""
     voice = film.stem("voice")
     if voice is None:
         raise StepError("no voice stem; add the lead vocal as audio/voice.wav and name it in film.json stems.voice")
-    lyric = film.path(film.data.get("lyric") or "lyric.txt")
-    text = lyric.read_text(encoding="utf-8") if lyric.is_file() else ""
+    text = lyric_text(film)
     if not text.strip():
-        raise StepError(f"{film.folder.relative(lyric)} is empty: write the lyric as sung first")
+        raise StepError(f"{film.folder.relative(lyric_path(film))} is empty: write the lyric as sung first")
     samples, rate = _wav(voice)
     choir_path = film.stem("choir")
     choir, choir_rate = _wav(choir_path) if choir_path else (None, None)
     labels = load_labels(film.path(LABELS)) if film.path(LABELS).is_file() else None
     timing = time_lines(text, samples, rate, labels=labels, choir=choir, choir_rate=choir_rate,
                         fixes=film.data.get("vocal_patches") or {})
-    out = write_timing(timing, film.path("analysis/voice-lines.json"))
+    return timing, write_timing(timing, film.path(VOICE_LINES))
+
+
+def _time(argv: Sequence[str]) -> int:
+    p = parser("time", "Time every sung line from the voice stem's level and write analysis/voice-lines.json.\n"
+                       "Word labels in analysis/word-labels.json (when present) only say which words are where.\n"
+                       "film.json vocal_patches [start, end] win over what is measured.")
+    film_argument(p)
+    film = Film.open(p.parse_args(argv).film)
+    timing, out = measure_lines(film)
     flagged = 0
     for line in timing.lines:
         when = f"{line.start:7.2f} {line.end:7.2f}" if line.start is not None else "  no time       "
@@ -64,14 +80,8 @@ def _time(argv: Sequence[str]) -> int:
     return 0
 
 
-def _bars(argv: Sequence[str]) -> int:
-    p = parser("bars", "Find every beat and the bar's one; write analysis/pulse.json and analysis/swells.json.\n"
-                       "Beats come from the drum stem, else the band, else the mix. A downbeat_slot in film.json (what\n"
-                       "the person counted by ear) overrides the guess. Check it by ear with tools/click.py.")
-    film_argument(p)
-    p.add_argument("--bpm", type=float, help="a tempo hint when the guess lands on half or double time")
-    args = p.parse_args(argv)
-    film = Film.open(args.film)
+def measure_pulse(film: Film, bpm: float | None = None) -> Pulse:
+    """The `bars` machinery: beats, the bar's one and swells, written to analysis/pulse.json and swells.json."""
     loaded = {name: _wav(path) for name in ("drums", "band", "mix") if (path := film.stem(name)) is not None}
     if not loaded:
         raise StepError("bars needs a drum, band or mix stem in film.json stems")
@@ -83,10 +93,20 @@ def _bars(argv: Sequence[str]) -> int:
     voice_path = film.stem("voice")
     voice, voice_rate = _wav(voice_path) if voice_path else (None, None)
     found = pulse(stems.get("drums"), rate, band=stems.get("band"), mix=stems.get("mix"),
-                  vocal=_mono(voice) if voice is not None else None, vocal_rate=voice_rate, hint_bpm=args.bpm,
+                  vocal=_mono(voice) if voice is not None else None, vocal_rate=voice_rate, hint_bpm=bpm,
                   downbeat_slot=film.data.get("downbeat_slot"))
     found.write(film.path("analysis"))
-    data = found.to_dict()
+    return found
+
+
+def _bars(argv: Sequence[str]) -> int:
+    p = parser("bars", "Find every beat and the bar's one; write analysis/pulse.json and analysis/swells.json.\n"
+                       "Beats come from the drum stem, else the band, else the mix. A downbeat_slot in film.json (what\n"
+                       "the person counted by ear) overrides the guess. Check it by ear with tools/click.py.")
+    film_argument(p)
+    p.add_argument("--bpm", type=float, help="a tempo hint when the guess lands on half or double time")
+    args = p.parse_args(argv)
+    data = measure_pulse(Film.open(args.film), args.bpm).to_dict()
     print(f"{data['bpm']:.2f} BPM, {len(data['beats'])} beats, the one on beats with index mod 4 = "
           f"{data['downbeat_slot']} ({data['ruling']})")
     if data.get("question"):
@@ -98,9 +118,9 @@ def _bars(argv: Sequence[str]) -> int:
 def _clip_audio(clip: Path, scratch: Path) -> tuple[np.ndarray, int] | None:
     """The render's own soundtrack as mono 16 kHz, or None when it has none."""
     out = scratch / f"{clip.stem}.wav"
-    command = [ENCODER_EXE, "-y", "-v", "error", "-nostdin", "-i", str(clip), "-vn", "-ac", "1", "-ar", "16000",
+    command = [ENCODER_EXE, "-y", "-v", "error", "-nostdin", *input_args(clip), "-vn", "-ac", "1", "-ar", "16000",
                "-c:a", "pcm_s16le", str(out)]
-    done = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    done = subprocess.run(command_of(command), capture_output=True, text=True, encoding="utf-8", errors="replace")
     if done.returncode != 0:
         if any(sign in done.stderr for sign in NO_AUDIO):
             return None

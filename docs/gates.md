@@ -21,6 +21,9 @@ that reads as a model or an agent (`Claude`, `claude2`, `Claude-Opus`, `assistan
 A stored answer without `approves` counts as a refusal, and an answer dated before the question it answers is
 refused, both when it is made and when `standing.json` is read back.
 
+A reply typed by the director in the Claude app and taken with `atomic-flix desk` is recorded as `relayed`, and
+`notes.md` adds that it arrived that way (`docs/desk.md`).
+
 ## The limit: this is bookkeeping, not authentication
 
 A program cannot prove who typed. `person-direct` only means the words came in on a terminal the command was

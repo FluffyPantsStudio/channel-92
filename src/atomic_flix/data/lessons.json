@@ -450,7 +450,14 @@
    "example_bad": "50 takes queued with no hours stated.",
    "example_good": "50 takes, about 2.1 GPU h on one card; approved budget 3 h.",
    "bad_case": {"batch": {"takes": 4}, "film": {"gates": {"spend": {"budget_s": 100}}}},
-   "good_case": {"batch": {"takes": 4}, "film": {"gates": {"spend": {"budget_s": 1000}}}}}
+   "good_case": {"batch": {"takes": 4}, "film": {"gates": {"spend": {"budget_s": 1000}}}}},
+  {"id": "AR1", "lessons": [], "scope": "still", "level": "block",
+   "rule": "Once the director has chosen the aspect (film.json setup.aspect), the render frame and every first frame have that picture shape, within 3 %.",
+   "hint": "Make the still again at the chosen aspect, or record a new choice with `atomic-flix choose FILM aspect`; never crop a still to pass.",
+   "example_bad": "a 1280x720 first frame on a film chosen at 4:3",
+   "example_good": "a 1024x768 first frame on a film chosen at 4:3",
+   "bad_case": {"film": {"setup": {"aspect": "4:3"}, "frame": [1024, 768]}, "pictures": {"S01": [1280, 720]}},
+   "good_case": {"film": {"setup": {"aspect": "4:3"}, "frame": [1024, 768]}, "pictures": {"S01": [1024, 768]}}}
  ],
  "reviewer": [
   {"id": "hands", "lessons": ["L010"], "applies": "still with a person", "level": "block",

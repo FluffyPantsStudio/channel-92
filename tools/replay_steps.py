@@ -18,8 +18,10 @@ import numpy as np
 
 from atomic_flix.cut.bars import beat_count
 from atomic_flix.cut.edit import Cut, Edit, Placed, sung_intervals
+from atomic_flix.cut.media import input_args
 from atomic_flix.place import fit_by_sound, voiced_phrases
 from atomic_flix.place.features import FEATURE_RATE, HOP_S, N_BANDS, resample, sound_features
+from atomic_flix.programs import command_of
 from atomic_flix.timing import Label, save_labels
 from atomic_flix.wav import read_wav
 
@@ -101,8 +103,8 @@ def picked_take(takes: Path, key: str, picks: dict) -> tuple[Path, str]:
 
 def soundtrack(video: Path) -> np.ndarray | None:
     """A take's own sound, mono at 16 kHz, or None when it has none."""
-    done = subprocess.run(["ffmpeg", "-v", "error", "-i", str(video), "-vn", "-ac", "1", "-ar", str(FEATURE_RATE),
-                           "-f", "f32le", "-"], capture_output=True)
+    done = subprocess.run(command_of(["ffmpeg", "-v", "error", *input_args(video), "-vn", "-ac", "1",
+                                      "-ar", str(FEATURE_RATE), "-f", "f32le", "-"]), capture_output=True)
     if done.returncode != 0 or not done.stdout:
         return None
     return np.frombuffer(done.stdout, dtype="<f4").astype(np.float64)

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "atomic-flix"
 dynamic = ["version"]
-description = "A local-first kit for making music videos from song stems with ComfyUI and Blender."
+description = "Channel 92: a free kit for cinematic music films."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -13,8 +13,15 @@ dependencies = ["numpy"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "coverage", "build", "setuptools>=64"]
+brand = ["Pillow"]
+
+[project.urls]
+Homepage = "https://github.com/FluffyPantsStudio/channel-92"
+Source = "https://github.com/FluffyPantsStudio/channel-92"
+Issues = "https://github.com/FluffyPantsStudio/channel-92/issues"
 
 [project.scripts]
+channel92 = "atomic_flix.cli:main"
 atomic-flix = "atomic_flix.cli:main"
 
 [tool.setuptools.dynamic]
@@ -24,14 +31,16 @@ version = { attr = "atomic_flix.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-atomic_flix = ["data/*.json", "data/rules/*.txt", "scenes/FORMAT.md", "scenes/pieces/*.json",
+atomic_flix = ["brand/*.png", "brand/eras/*.png", "looks/*.json", "data/*.json", "data/rules/*.txt", "scenes/FORMAT.md", "scenes/pieces/*.json",
                "scenes/pieces/*/*.json", "scenes/pieces/*/*.py", "workflows/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
     "first_film: reads the first film's stems, takes or cuts (local only, read-only; needs FLIX_FIRST_FILM or the fixture pack, skipped without them)",
+    "ntsc_rs: runs the real ntsc-rs-cli (skipped unless CHANNEL92_NTSC_RS or the PATH has it)",
     "blender: starts Blender headless (slow, no GPU needed for the tiny scene; skipped without Blender)",
+    "network: downloads from the real internet (skipped unless CHANNEL92_NETWORK_TESTS=1)",
 ]
 
 [tool.coverage.run]

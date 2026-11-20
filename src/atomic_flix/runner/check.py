@@ -4,11 +4,11 @@ writes UTF-8 (on Windows the default code page garbles lyrics). Only reads; neve
 from __future__ import annotations
 
 import os
-import shutil
 import sys
 from dataclasses import dataclass
 from typing import Callable
 
+from ..programs import find_program
 from .comfy import ComfyClient, ComfyError
 from .commit import headroom_gb
 
@@ -19,7 +19,7 @@ class CheckReport:
     lines: tuple[str, ...]
 
 
-def check_hosts(hosts: list[str], *, which: Callable[[str], str | None] = shutil.which,
+def check_hosts(hosts: list[str], *, which: Callable[[str], object] = find_program,
                 utf8_mode: bool | None = None, windows: bool | None = None, timeout_s: float = 10.0,
                 headroom: Callable[[], float | None] = headroom_gb, allow_remote: bool = False) -> CheckReport:
     lines: list[str] = []

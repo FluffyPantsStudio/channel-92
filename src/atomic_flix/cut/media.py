@@ -1,7 +1,10 @@
 """ffmpeg and ffprobe through subprocess: probe a clip, read its frames into numpy, write frames and pictures.
 
 Every rescale in the kit goes through `SCALE_FLAGS` (accurate rounding, full chroma, bit-exact), so a picture is not
-darkened or shifted by a conversion.
+darkened or shifted by a conversion. Every program is launched by its absolute path (`programs.command_of`), and
+every input a command reads goes in through `input_args` (a file) or `STDIN_ONLY` (the kit's own pipe): ffmpeg may
+then open only local files and pipes, never a network address or a playlist, and a file whose extension fixes its
+format is read as that format.
 """
 
 from __future__ import annotations
@@ -15,11 +18,28 @@ from typing import Iterable, Iterator
 
 import numpy as np
 
+from ..programs import command_of
+
 SCALE_FLAGS = "bicubic+accurate_rnd+full_chroma_int+bitexact"
 ENCODER_EXE = "ffmpeg"
 FFPROBE = "ffprobe"
 ERROR_TAIL = 600
 SEEK_AFTER_FRAMES = 120   # past this many frames, seek near the start frame instead of decoding from the top
+FILE_ONLY = ["-protocol_whitelist", "file,pipe"]
+STDIN_ONLY = ["-protocol_whitelist", "pipe,fd"]     # ffmpeg 8 reads "-" through its fd protocol
+DEMUXERS = {".png": "png_pipe", ".jpg": "jpeg_pipe", ".jpeg": "jpeg_pipe", ".webp": "webp_pipe", ".mkv": "matroska",
+            ".mp4": "mov", ".mov": "mov", ".m4a": "mov", ".wav": "wav"}
+
+
+def source_args(path) -> list[str]:
+    """The options that go before one input file: local files only, and the format its extension fixes."""
+    found = DEMUXERS.get(Path(str(path)).suffix.lower())
+    return [*FILE_ONLY, *(["-f", found] if found else [])]
+
+
+def input_args(path) -> list[str]:
+    """One input file for an ffmpeg command: `source_args`, then -i PATH."""
+    return [*source_args(path), "-i", str(path)]
 
 
 class MediaError(RuntimeError):
@@ -48,8 +68,8 @@ def probe(path) -> ClipInfo:
     """Size, frame rate and frame count of a clip's first video stream (a still counts as one frame)."""
     command = [FFPROBE, "-v", "error", "-select_streams", "v:0",
                "-show_entries", "stream=width,height,r_frame_rate,avg_frame_rate,nb_frames,duration",
-               "-show_entries", "format=duration", "-of", "json", str(path)]
-    done = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+               "-show_entries", "format=duration", "-of", "json", *source_args(path), str(path)]
+    done = subprocess.run(command_of(command), capture_output=True, text=True, encoding="utf-8")
     if done.returncode != 0:
         raise MediaError(f"ffprobe could not read {path}: {done.stderr.strip()[-ERROR_TAIL:]}")
     data = json.loads(done.stdout or "{}")
@@ -83,7 +103,7 @@ def _decode_command(path, size, grey, start_frame, count, fps, extra_filters) ->
         filters.append(f"fps={fps}")
     if size:
         filters.append(f"scale={size[0]}:{size[1]}:flags={SCALE_FLAGS}")
-    command = [ENCODER_EXE, "-v", "error", "-nostdin", *seek, "-i", str(path)]
+    command = [ENCODER_EXE, "-v", "error", "-nostdin", *seek, *input_args(path)]
     if filters:
         command += ["-vf", ",".join(filters)]
     if count is not None:
@@ -117,7 +137,7 @@ def iter_frames(path, *, size=None, grey: bool = False, start_frame: int = 0, co
     last_wanted = max(keep) if keep else None
     command = _decode_command(path, (width, height) if (size or extra) else None, grey, start_frame, count, fps,
                               extra)
-    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    process = subprocess.Popen(command_of(command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     index = int(start_frame)
     stopped_early = False
     try:
@@ -156,10 +176,10 @@ def write_video(path, frames: np.ndarray, fps: float, *, crf: int = 16, x264_spe
     count, height, width, _ = data.shape
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    command = [ENCODER_EXE, "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{width}x{height}",
-               "-r", str(fps), "-i", "-", "-sws_flags", SCALE_FLAGS, "-c:v", "libx264", "-preset", x264_speed,
-               "-crf", str(crf), "-pix_fmt", "yuv420p", str(out)]
-    done = subprocess.run(command, input=data.tobytes(), capture_output=True)
+    command = [ENCODER_EXE, "-y", "-v", "error", *STDIN_ONLY, "-f", "rawvideo", "-pix_fmt", "rgb24",
+               "-s", f"{width}x{height}", "-r", str(fps), "-i", "-", "-sws_flags", SCALE_FLAGS, "-c:v", "libx264",
+               "-preset", x264_speed, "-crf", str(crf), "-pix_fmt", "yuv420p", str(out)]
+    done = subprocess.run(command_of(command), input=data.tobytes(), capture_output=True)
     if done.returncode != 0:
         raise MediaError(f"ffmpeg could not write {out}: {done.stderr.decode(errors='replace')[-ERROR_TAIL:]}")
     return out
@@ -171,12 +191,12 @@ def write_image(path, picture: np.ndarray, *, jpeg_q: int = 2) -> Path:
     height, width = data.shape[:2]
     out = Path(path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    command = [ENCODER_EXE, "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{width}x{height}",
-               "-i", "-", "-frames:v", "1", "-sws_flags", SCALE_FLAGS]
+    command = [ENCODER_EXE, "-y", "-v", "error", *STDIN_ONLY, "-f", "rawvideo", "-pix_fmt", "rgb24",
+               "-s", f"{width}x{height}", "-i", "-", "-frames:v", "1", "-sws_flags", SCALE_FLAGS]
     if out.suffix.lower() in (".jpg", ".jpeg"):
         command += ["-q:v", str(jpeg_q), "-pix_fmt", "yuvj444p"]
     command += ["-update", "1", str(out)]
-    done = subprocess.run(command, input=data.tobytes(), capture_output=True)
+    done = subprocess.run(command_of(command), input=data.tobytes(), capture_output=True)
     if done.returncode != 0:
         raise MediaError(f"ffmpeg could not write {out}: {done.stderr.decode(errors='replace')[-ERROR_TAIL:]}")
     return out
@@ -184,7 +204,7 @@ def write_image(path, picture: np.ndarray, *, jpeg_q: int = 2) -> Path:
 
 def run_ffmpeg(command: list[str], what: str) -> subprocess.CompletedProcess:
     """Run an ffmpeg command, raising MediaError with the tail of its log on failure."""
-    done = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    done = subprocess.run(command_of(command), capture_output=True, text=True, encoding="utf-8", errors="replace")
     if done.returncode != 0:
         raise MediaError(f"ffmpeg failed to {what}: {done.stderr.strip()[-ERROR_TAIL:]}")
     return done

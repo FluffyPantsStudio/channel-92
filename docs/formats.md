@@ -21,7 +21,7 @@ in `formats.py` and this page says what changed and how to move a file across.
 
 | Kind | File | Written by |
 |---|---|---|
-| `film` | `film.json` | `new`, and any step that saves the film |
+| `film` | `film.json` (its `setup` block holds the aspect and year from `choose`; `brand` holds `logo` and `intro`, `"era"` or a clip) | `new`, `choose`, and any step that saves the film |
 | `standing` | `standing.json` | gates and `new` |
 | `job-log-row` | each line of `job-log.jsonl` (`docs/job-log.md`) | the runner |
 | `machine-log-row` | each line of the machine's job log (`jobs.jsonl`) | the runner |
@@ -30,6 +30,7 @@ in `formats.py` and this page says what changed and how to move a file across.
 | `voice-lines` | `analysis/voice-lines.json` | `time` |
 | `word-labels` | `analysis/word-labels.json` | the word labeller |
 | `pulse`, `swells` | `analysis/pulse.json`, `analysis/swells.json` | `bars` |
+| `structure` | `analysis/structure.json` (its page: `plan/structure.md`) | `structure` |
 | `cuts`, `task` | `plan/cuts.json`, `plan/<key>.task.json` | `plan` |
 | `fit` | `renders/<key>/rNNN.fit.json` | `place` |
 | `edit`, `audit`, `strobe` | `cuts/vNN.edit.json`, `cuts/vNN.audit.json`, `cuts/vNN-strobe.json` | `cut`, `cut` module |
@@ -43,6 +44,8 @@ in `formats.py` and this page says what changed and how to move a file across.
 | `fixture-truth`, `fixture-manifest` | `fixtures/*/truth.json`, `fixtures/first-film/manifest.json` | `tools/make_fixtures.py`, `tools/synth_song.py` |
 | `replay` | `replay.json` in a replay folder | `tools/replay_first_film.py` |
 | `eval` | `eval/report.json` (`docs/eval.md`) | `eval` |
+| `packet` | `desk/<gate>/manifest.json` (`docs/desk.md`) | `packet` |
+| `director` | `review/director.json`, append-only `replies` and `marks` (`docs/desk.md`) | `desk` |
 | `rules-map` | `atomic_flix/data/rules-map.json` | a person; a test keeps it whole |
 
 Optional fields added without a version change, since an old reader ignores them: a shot's `scene:` in the shot

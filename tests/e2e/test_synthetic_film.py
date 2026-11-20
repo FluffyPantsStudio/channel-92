@@ -1,7 +1,7 @@
 """A whole film on a tiny synthetic song, with no GPU: the steps of docs/quickstart.md, in order.
 
-new -> gates 1 and 2 -> time -> bars -> stills and gates 3 and 4 -> plan -> lint -> budget -> gate 5 -> shoot (fake
-ComfyUI) -> place -> cut -> review -> compare. Each step reads and writes the film's own folder.
+new -> structure -> gates 1 and 2 -> time -> bars -> stills and gates 3 and 4 -> plan -> lint -> budget -> gate 5 -> shoot (fake
+ComfyUI) -> place -> cut -> grade -> review -> finish -> compare. Each step reads and writes the film's own folder.
 """
 
 from __future__ import annotations
@@ -50,7 +50,7 @@ def write_stills(film: Path, keys: list[str]) -> None:
     passed = {item["id"]: "PASS: checked at full size" for item in RULE_DATA["reviewer"]}
     rng = np.random.default_rng(3)
     for key in keys:
-        picture = (rng.random((192, 320, 3)) * 255).astype(np.uint8)
+        picture = (rng.random((256, 448, 3)) * 255).astype(np.uint8)
         write_image(film / "stills" / f"{key}.png", picture)
         record = {"how": "synthetic test picture", "figures": [],
                   "judge": {"verdict": "PASS", "full_size": True, "items": passed}}
@@ -71,13 +71,16 @@ def test_a_tiny_film_from_stems_to_compare(tmp_path, song, capsys):
 
     run("new", film, "--song", provenance / "mix.wav", "--voice", provenance / "voice.wav", "--band", provenance / "band.wav",
         "--drums", provenance / "drums.wav", "--lyric", provenance / "lyric.txt", "--shots", provenance / "shots.txt",
-        "--star", "Nova", "--who", "a singer with short silver hair")
+        "--star", "Nova", "--who", "a singer with short silver hair", "--aspect", "16:9", "--by", "Test Person",
+        "--words", "wide, like the channel's later years")
     data = json.loads((film / "film.json").read_text(encoding="utf-8"))
-    data.update({"frame": [320, 192], "final_size": [320, 192], "batch": {"takes": 1, "cards": 1},
+    data.update({"frame": [448, 256], "final_size": [448, 256], "batch": {"takes": 1, "cards": 1},
                  "wardrobe": {"main": "wearing a white jacket over a black top"}})
     (film / "film.json").write_text(json.dumps(data), encoding="utf-8")
 
-    gate(film, "concept", "the rooftop one", "pitches.md")
+    run("structure", film)
+    assert (film / "plan/structure.md").is_file()
+    gate(film, "concept", "the rooftop one", "pitches.md", "plan/structure.md")
     run("time", film)
     lines = {line["id"]: line for line in json.loads((film / "analysis/voice-lines.json").read_text("utf-8"))["lines"]}
     for expected in truth["lines"]:
@@ -133,7 +136,8 @@ def test_a_tiny_film_from_stems_to_compare(tmp_path, song, capsys):
     audio = audit["audio"]                          # one plain gain toward -14 LUFS, the peak kept under -1 dBFS
     assert audio["peak_after_db"] <= -1.0 + 0.05 and audio["lufs_after"] <= -14.0 + 0.5
     clip = probe(film / "cuts/v01.mp4")
-    assert (clip.width, clip.height) == (320, 192)
+    assert (clip.width, clip.height) == (448, 256)
+    assert "logo" not in json.loads((film / "cuts/v01.edit.json").read_text(encoding="utf-8"))   # the cut is clean
     strobe = json.loads((film / "cuts/v01-strobe.json").read_text(encoding="utf-8"))
     assert strobe["passed"] is True
 
@@ -145,6 +149,12 @@ def test_a_tiny_film_from_stems_to_compare(tmp_path, song, capsys):
 
     run("review", film)
     assert (film / "review/v01/MANIFEST.txt").is_file()
+
+    toned = (film / "cuts/v01-toned.mp4").read_bytes()
+    run("finish", film, "--speed", "ultrafast")    # no year: the logo, no era look
+    assert "no era" in capsys.readouterr().out
+    assert probe(film / "cuts/v01-final.mp4").frames == probe(film / "cuts/v01-toned.mp4").frames
+    assert (film / "cuts/v01-toned.mp4").read_bytes() == toned
 
     run("eval", film, expect=1)                     # before v1: no cold review round yet, no judge times
     report = json.loads((film / "eval/report.json").read_text(encoding="utf-8"))

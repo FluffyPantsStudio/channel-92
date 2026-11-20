@@ -54,7 +54,7 @@ def test_state_file_says_the_concept_gate_is_next(tmp_path):
     summary = where_it_stands(film)
     assert "gate 1 of 6" in summary
     assert "concept" in summary
-    assert "Which pitch is the film?" in summary
+    assert "Is this the film?" in summary
 
 
 @pytest.mark.parametrize("slug", ["Glass Harbour", "glass_harbour", "-x", "x-", "", "a/b", ".."])

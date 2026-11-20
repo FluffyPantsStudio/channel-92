@@ -9,11 +9,16 @@ import tempfile
 from pathlib import Path
 from typing import Sequence
 
+from ..desk import mark_lines
 from ..gates import GATE_IDS, PERSON_DIRECT, RELAYED, Answer, GateRefused, gate_spec, now_text
 from ..project import (FilmFolder, ProjectError, answer_gate, ask_gate, create_project, reopen_gate, validate,
                        where_it_stands)
 from ..timing import parse_lyric
+from ..project.setup import setup_lines
 from .common import LINEUP_FILE, Film, StepError, film_argument, parser
+from .setup_steps import add_setup_arguments, apply_new_choices, check_new_choices
+from .sound_steps import VOICE_LINES
+from .structure_steps import PULSE, STRUCTURE_JSON, STRUCTURE_PAGE
 
 STEMS = ("mix", "voice", "band", "drums", "choir")
 WHAT_STEMS_DO = {
@@ -52,11 +57,29 @@ def _copy_inputs(film: Film, args) -> Film:
     return film.save(data)
 
 
+def structure_line(film: Film) -> str:
+    """The first analysis, before gate 1: the song's structure, missing, stale or there."""
+    made = film.path(STRUCTURE_JSON)
+    if not made.is_file():
+        return (f"todo   {STRUCTURE_JSON}: run `atomic-flix structure FILM` first, before gate 1: the song's sections, "
+                f"sung and instrumental, and its story gaps ({STRUCTURE_PAGE} is shown with the concept)")
+    inputs = [film.folder.lyric, film.path(VOICE_LINES), film.path(PULSE)]
+    inputs += [path for name in ("voice", "band", "mix") if (path := film.stem(name)) is not None]
+    newer = [film.folder.relative(path) for path in inputs if path.is_file()
+             and path.stat().st_mtime > made.stat().st_mtime]
+    if newer:
+        return f"stale  {STRUCTURE_JSON}: older than {', '.join(newer)}; run `atomic-flix structure FILM` again"
+    return f"ok     {STRUCTURE_PAGE}: the song's structure, shown at gate 1 with the concept"
+
+
 def readiness(film: Film) -> list[str]:
     """What the folder lacks before each step, in plain lines: the validator's findings, then the kit's own."""
     stems = film.data.get("stems") or {}
     explained = {stems.get(name) for name in STEMS if name not in ("mix", "voice")}
     lines = [str(finding) for finding in validate(film.folder) if finding.path not in explained]
+    lines.append(structure_line(film))
+    lines += setup_lines(film.data)
+    lines += mark_lines(film.root)
     lyric = film.folder.lyric.read_text(encoding="utf-8") if film.folder.lyric.is_file() else ""
     if lyric.strip():
         parsed = parse_lyric(lyric)
@@ -89,7 +112,9 @@ def _new(argv: Sequence[str]) -> int:
     p.add_argument("--star", help="the singer's name as the prompts write it")
     p.add_argument("--who", help="one sentence from canon saying who the singer is")
     p.add_argument("--dry-run", action="store_true", help="build it in a temporary folder, report, keep nothing")
+    add_setup_arguments(p, for_new=True)
     args = p.parse_args(argv)
+    check_new_choices(args, p.error)
     aim = args.film
     name = args.name or aim.name.replace("-", " ").title()
     if args.dry_run:
@@ -111,7 +136,7 @@ def _make(parent: Path, slug: str, name: str, args) -> Film:
         folder = create_project(parent, slug, name)
     except ProjectError as problem:
         raise StepError(str(problem)) from None
-    return _copy_inputs(Film.open(folder.root), args)
+    return apply_new_choices(_copy_inputs(Film.open(folder.root), args), args)
 
 
 def _progress(argv: Sequence[str]) -> int:

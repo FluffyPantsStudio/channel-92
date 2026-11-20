@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import json
 import re
-import shutil
 import subprocess
 from pathlib import Path
 from typing import Iterable, Iterator, Sequence
@@ -26,7 +25,9 @@ import numpy as np
 
 from . import path as camera_path
 from .imageio import read_exr, write_png
+from ..cut.media import FILE_ONLY, STDIN_ONLY, input_args
 from ..formats import tag
+from ..programs import program
 from ..sizes import CONTROL_VIDEO_STEP, GRAPH_STEP, FrameSizeError, check_multiple
 
 SIZE_RULES = {"ltx": CONTROL_VIDEO_STEP, "scail": GRAPH_STEP, "wan": GRAPH_STEP}
@@ -236,10 +237,8 @@ def draw_pose(ties: dict, w: int, h: int, stick: float | None = None) -> np.ndar
 # ---------------------------------------------------------------- video in and out
 
 def _encoder() -> str:
-    exe = shutil.which("ffmpeg")
-    if not exe:
-        raise FileNotFoundError("ffmpeg is not on PATH")
-    return exe
+    """ffmpeg's absolute path, from the real PATH only (programs.py); FileNotFoundError when it is not there."""
+    return program("ffmpeg")
 
 
 class VideoWriter:
@@ -256,7 +255,8 @@ class VideoWriter:
         if self.proc is None:
             h, w = rgb.shape[:2]
             self.path.parent.mkdir(parents=True, exist_ok=True)
-            cmd = [_encoder(), "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{w}x{h}",
+            cmd = [_encoder(), "-y", "-loglevel", "error", *STDIN_ONLY, "-f", "rawvideo", "-pix_fmt", "rgb24",
+                   "-s", f"{w}x{h}",
                    "-r", str(self.fps), "-i", "-", "-sws_flags", SWS, "-c:v", "libx264", "-crf", str(self.crf),
                    "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(self.path)]
             self.proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
@@ -283,10 +283,12 @@ def read_frames(provenance: str | Path, w: int, h: int, start: int | None = None
     """Decode a video, or an image sequence such as shaded/%04d.png starting at frame `start`, to RGB frames scaled
     to cover w x h and centre-cropped."""
     args = [_encoder(), "-loglevel", "error"]
-    if start is not None:
-        args += ["-start_number", str(start), "-f", "image2"]
+    if start is not None:       # a numbered sequence: the image2 demuxer reads its %04d pattern
+        source = [*FILE_ONLY, "-start_number", str(start), "-f", "image2", "-i", str(provenance)]
+    else:
+        source = input_args(provenance)
     vf = f"scale={w}:{h}:force_original_aspect_ratio=increase:flags={SWS},crop={w}:{h}"
-    args += ["-i", str(provenance), "-vf", vf, "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
+    args += [*source, "-vf", vf, "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
     proc = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     size = w * h * 3
     finished = False

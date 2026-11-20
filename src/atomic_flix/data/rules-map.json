@@ -68,6 +68,7 @@
   {"id": "L043", "source": "lessons", "method": "auto", "check": "lint", "unit": "film", "level": "block", "due": "spend"},
   {"id": "L091", "source": "lessons", "method": "auto", "check": "lint", "unit": "film", "level": "block", "due": "spend"},
   {"id": "L127", "source": "lessons", "method": "auto", "check": "lint", "unit": "film", "level": "block", "due": "v1"},
+  {"id": "AR1", "source": "lessons", "method": "auto", "check": "lint", "unit": "shot", "level": "block", "due": "spend"},
   {"id": "RV-hands", "source": "lessons:reviewer", "method": "judge", "check": null, "unit": "shot", "level": "block", "due": "spend", "why": "a judge looks at each first frame at full size and answers the reviewer question"},
   {"id": "RV-mouth", "source": "lessons:reviewer", "method": "judge", "check": null, "unit": "shot", "level": "block", "due": "spend", "why": "a judge looks at each first frame at full size and answers the reviewer question"},
   {"id": "RV-marks", "source": "lessons:reviewer", "method": "judge", "check": null, "unit": "shot", "level": "block", "due": "spend", "why": "a judge looks at each first frame at full size and answers the reviewer question"},

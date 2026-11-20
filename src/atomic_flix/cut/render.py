@@ -21,7 +21,8 @@ import numpy as np
 from .audit import HIDDEN_HEAD_FRAMES, AuditReport, audit_edit, take_indices
 from .edit import Edit, Placed
 from .loudness import Loudness, measure_loudness, plain_gain
-from .media import ERROR_TAIL, ENCODER_EXE, SCALE_FLAGS, ClipInfo, MediaError, probe
+from ..programs import command_of
+from .media import ERROR_TAIL, ENCODER_EXE, SCALE_FLAGS, STDIN_ONLY, ClipInfo, MediaError, input_args, probe
 
 AUDIO_RATE = 48000
 AUDIO_BITRATE = "320k"
@@ -53,7 +54,7 @@ def _picture_filters(placed: Placed, size: tuple[int, int], first_index: int) ->
 
 
 def _decode_command(placed: Placed, size: tuple[int, int], first_index: int, count: int) -> list[str]:
-    return [ENCODER_EXE, "-v", "error", "-nostdin", "-i", str(placed.file),
+    return [ENCODER_EXE, "-v", "error", "-nostdin", *input_args(placed.file),
             "-vf", _picture_filters(placed, size, first_index), "-frames:v", str(count),
             "-fps_mode", "passthrough", "-sws_flags", SCALE_FLAGS, "-f", "rawvideo", "-pix_fmt", "yuv420p", "-"]
 
@@ -73,10 +74,10 @@ def _audio_filters(edit: Edit, trim_db: float | None) -> str:
 def _encode_command(edit: Edit, out: Path, trim_db: float | None, crf: int, x264_speed: str) -> list[str]:
     width, height = edit.size
     seconds = edit.end - edit.start
-    command = [ENCODER_EXE, "-y", "-v", "error", "-nostdin", "-f", "rawvideo", "-pix_fmt", "yuv420p",
+    command = [ENCODER_EXE, "-y", "-v", "error", "-nostdin", *STDIN_ONLY, "-f", "rawvideo", "-pix_fmt", "yuv420p",
                "-s", f"{width}x{height}", "-r", f"{edit.fps:g}", "-i", "-"]
     if edit.song:
-        command += ["-ss", f"{edit.start:.6f}", "-t", f"{seconds:.6f}", "-i", str(edit.song),
+        command += ["-ss", f"{edit.start:.6f}", "-t", f"{seconds:.6f}", *input_args(edit.song),
                     "-map", "0:v", "-map", "1:a", "-af", _audio_filters(edit, trim_db),
                     "-c:a", "aac", "-b:a", AUDIO_BITRATE]
     else:
@@ -109,7 +110,7 @@ def _emit_shot(encoder: subprocess.Popen, placed: Placed, info: ClipInfo, indice
     last = min(int(wanted[-1]), info.frames - 1)
     if first > info.frames - 1:
         first = last = info.frames - 1
-    decoder = subprocess.Popen(_decode_command(placed, size, first, last - first + 1),
+    decoder = subprocess.Popen(command_of(_decode_command(placed, size, first, last - first + 1)),
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     current_index, current = first - 1, None
     try:
@@ -149,7 +150,8 @@ def render_cut(edit: Edit, out, *, crf: int = 16, x264_speed: str = "slow", stri
     out.parent.mkdir(parents=True, exist_ok=True)
     partial = out.with_name(out.stem + ".partial" + out.suffix)
     with tempfile.TemporaryFile() as log:
-        encoder = subprocess.Popen(_encode_command(edit, partial, gain, crf, x264_speed), stdin=subprocess.PIPE,
+        encoder = subprocess.Popen(command_of(_encode_command(edit, partial, gain, crf, x264_speed)),
+                                   stdin=subprocess.PIPE,
                                    stderr=log)
         try:
             for shot in edit.shots():

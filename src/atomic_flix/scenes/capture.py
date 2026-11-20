@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import os
-import shutil
 import subprocess
 from pathlib import Path
 from statistics import mean
@@ -17,6 +16,7 @@ from typing import Sequence
 from .library import Library
 from .plan import write_job
 from ..formats import stamped
+from ..programs import command_of, find_program
 
 RUN_SCRIPT = Path(__file__).resolve().parent / "blender_run.py"
 DEFAULT_BLENDER = Path("C:/Program Files/Blender Foundation/Blender 5.2/blender.exe")
@@ -30,9 +30,9 @@ def find_blender() -> Path:
         return Path(env)
     if DEFAULT_BLENDER.exists():
         return DEFAULT_BLENDER
-    found = shutil.which("blender")
+    found = find_program("blender")       # the real PATH only, never the current directory (programs.py)
     if found:
-        return Path(found)
+        return found
     raise FileNotFoundError("Blender not found: set FLIX_BLENDER to blender.exe")
 
 
@@ -72,7 +72,7 @@ def summarise(frames: Sequence[dict], renderer: str, w: int, h: int, wall_s: flo
 def run_blender(job_path: str | Path, app_exe: Path | None = None) -> str:
     app_exe = app_exe or find_blender()
     cmd = blender_command(app_exe, Path(job_path))
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
+    proc = subprocess.run(command_of(cmd), capture_output=True, text=True, encoding="utf-8", errors="replace")
     log = proc.stdout + proc.stderr
     Path(job_path).with_name("blender.log").write_text(log, encoding="utf-8")
     if proc.returncode != 0:

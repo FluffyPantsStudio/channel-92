@@ -71,7 +71,8 @@ def _film_json(root: Path) -> None:
             "downbeat_slot": 0, "ends_at": 22.0, "look": "photo", "frame": SIZE, "never": ["umbrella"],
             "props": {"lamp": {"ref": LAMP, "words": ["lantern"]}},
             "characters": {"Mira": {"identity": "refs/front.png", "hero": "refs/front.png", "body": "refs/body.png"}},
-            "batch": {"takes": 1, "cards": 1}}
+            "batch": {"takes": 1, "cards": 1},
+            "setup": {"aspect": "16:9", "tier": "standard", "aspect_by": "Test Person"}}
     _write(root / "film.json", stamped("film", film))
 
 

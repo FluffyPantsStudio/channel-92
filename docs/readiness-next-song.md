@@ -10,7 +10,7 @@ Status: the kit is built and reviewed on disk, not committed, not pushed.
 
 ## What the user must supply
 1. Stems of the exact take: mix, lead vocal, instrumental, and a drum stem if one exists (the bar's one is weaker without it); the restored master.
-2. The concept pick from three pitches, and which characters each shot shows.
+2. The concept: a pick from three pitches, or the person's own plot, and which characters each shot shows.
 3. The lyric as sung (repeats, scat line, backing).
 4. The singer's one-sentence identity from canon, approved.
 5. Answers at the six gates, recorded word for word.

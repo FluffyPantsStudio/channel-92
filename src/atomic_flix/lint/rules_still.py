@@ -7,6 +7,7 @@ are right in the picture is never guessed here: a judge or the person answers th
 
 from __future__ import annotations
 
+from ..aspects import ASPECTS, matches_aspect
 from .book import Book
 from .registry import rule
 
@@ -139,3 +140,22 @@ def blotchy_flat_area(book):
         if energy is not None and energy > 1.5 * median:
             yield shot.key, f"flat-area energy {energy} against the film's median {median}"
 
+
+
+def _shape(width: int, height: int) -> str:
+    return f"{width}x{height} ({width / height:.2f})" if height else f"{width}x{height}"
+
+
+@rule("AR1")
+def picture_shape(book):
+    chosen = (book.film.get("setup") or {}).get("aspect")
+    if chosen not in ASPECTS:
+        return
+    frame = book.film.get("frame")
+    shaped = isinstance(frame, (list, tuple)) and len(frame) == 2
+    if shaped and not matches_aspect(int(frame[0]), int(frame[1]), chosen):
+        yield None, f"the render frame is {_shape(*map(int, frame))}, not the chosen {chosen}"
+    for shot in book.shots:
+        size = book.pictures.get(shot.key)
+        if size is not None and not matches_aspect(size[0], size[1], chosen):
+            yield shot.key, f"the still is {_shape(*size)}, not the chosen {chosen}"
