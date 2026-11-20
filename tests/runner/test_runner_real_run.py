@@ -20,7 +20,7 @@ OLD_SEED = 2673691454
 
 def _request(key: str, graph, **extra) -> Request:
     inputs = {"opening_still": f"stills/{key}.png", "audio": f"plan/{key}.voice-soft.wav"}
-    return Request(key=key, graph=str(graph), wording=f"Frankie sings {key}", inputs=inputs, seconds=10, vocal=True,
+    return Request(key=key, graph=str(graph), wording=f"Nova sings {key}", inputs=inputs, seconds=10, vocal=True,
                    **extra)
 
 
@@ -56,7 +56,7 @@ def test_a_seed_outside_the_noise_range_is_refused_before_any_job_is_written(fil
 
 
 def test_the_batch_file_carries_a_seed(film_dir, sung_graph, tmp_path, capsys):
-    batch = {"requests": [{"key": "S02", "graph": str(sung_graph), "wording": "Frankie sings", "seconds": 10,
+    batch = {"requests": [{"key": "S02", "graph": str(sung_graph), "wording": "Nova sings", "seconds": 10,
                            "vocal": True, "seed": OLD_SEED,
                            "inputs": {"opening_still": "stills/S02.png", "audio": "plan/S02.voice-soft.wav"}}]}
     path = tmp_path / "batch.json"

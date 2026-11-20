@@ -54,13 +54,13 @@ model stays resident in that ComfyUI. The still alone took about 21 GB of commit
 `out/real-run/films/s13-real`: `atomic-flix new` with the first film's stems (fixture), lyric and full shot list
 (the replay's, `out/replay-first-film/inputs/`), film fields as the replay sets them (frame, tone, outfit,
 vocal_patches, downbeat_slot 3, ends_at), `analysis/` copied from the replay project (same kit), and the S13 still from
-`canon/frankie/singing/stills/S13.png`. A shot list holding S13 alone does not work: the first shot always starts at
+`canon/<singer>/singing/stills/S13.png`. A shot list holding S13 alone does not work: the first shot always starts at
 0, so S13 became 0 to 278.67 s with a 15 s render. With the whole list, `atomic-flix plan` gives the same S13 task as
 the replay: slice 145.6 s for 6 s, gate 146.23 to 150.74, full pin, soft copy `plan/S13.voice-soft.wav`.
 
 Lint on S13: no prompt rule fires. Its findings are WARN C1 (S12 and S13 on one setup at 0.8 and 0.85), WARN G1 (the
 gate opens at -31.2 dB, into sound), and, once the still has a judge record, BLOCK L017 and L022 (the test film has
-no identity reference or body panel for Frankie). The judge record (`stills/S13.json`) is mine, made at 1280x704 by
+no identity reference or body panel for the singer). The judge record (`stills/S13.json`) is mine, made at 1280x704 by
 looking at the picture (no hands, mouth closed and unsmiling, eyes on us, flat areas clean); it is not a cold judge's.
 The film as a whole stays blocked (45 shots without stills, gates 2, 3 and 5 unanswered), so the film verb `shoot`
 would refuse; the take was shot through `atomic-flix runner`, which does not run lint. No gate answer was recorded.
@@ -75,7 +75,7 @@ The prompt sent, against the person's pick (first film, take 22):
 | Swaying | "swaying gently, never stopping" | "swaying gently and continuously" |
 | Camera | "locked off: it does not move and does not zoom" plus a closing "Camera: Locked-off camera: no zoom, no push-in, no pull-back. One continuous shot; no cuts." | "locked off and keeps one size"; no closing camera line |
 | Timeline | three steps: 0-1s lips closed, 1-6s the line, 6-10s rest swaying | one step: "0-6s: her lips together at first, then she sings ...; then she keeps swaying gently with the music, her eyes on us." |
-| Look line | "...; natural anatomy. Only one Frankie appears. No on-screen text." | "Frankie looks just as she does in the first frame, ..., with a natural body." (no "only one Frankie", no "no on-screen text") |
+| Look line | "...; natural anatomy. Only one Nova appears. No on-screen text." | "Nova looks just as she does in the first frame, ..., with a natural body." (no "only one Nova", no "no on-screen text") |
 
 ## 4. The S13 take
 
@@ -161,5 +161,5 @@ a small closed-mouth smile on the last frame. Nobody has judged the take; it is 
    before the log replaces the first film's rates, and no cross-graph fallback for a different kind of job.
 8. **Machine log times have no offset** (local time), while the film ledger is UTC.
 9. **Lint and the reused still.** The single-shot film is impossible (first shot from 0), and a reused canon still
-   blocks on L017 and L022 until the film names Frankie's references; the first film's references are outside what
+   blocks on L017 and L022 until the film names the singer's references; the first film's references are outside what
    this run could read.

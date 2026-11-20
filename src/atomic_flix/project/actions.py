@@ -13,6 +13,7 @@ from dataclasses import replace
 from pathlib import Path
 from typing import Any, Sequence
 
+from ..eval.hook import require_eval
 from ..gates import GATES, PERSON_DIRECT, RELAYED, Answer, GateRefused, gate_spec, now_text
 from .layout import FilmFolder
 from .standing import BatchApproval, ProjectError, Standing, fingerprint, load_standing, save_standing
@@ -74,10 +75,12 @@ def _answer_block(standing: Standing, gate: str, answer: Answer) -> str:
 
 def ask_gate(film: FilmFolder | Path, gate: str, shown: Sequence[str], *, at: str | None = None,
              question: str | None = None) -> Standing:
-    """Record that SHOWN was put to the person at GATE with one question."""
+    """Record that SHOWN was put to the person at GATE with one question. Gates 5 and 6 are also refused while the
+    film's eval report is missing, stale or BLOCKED for that gate (`atomic-flix eval`, docs/eval.md)."""
     folder = _folder(film)
     standing = load_standing(folder)
     updated = replace(standing, gates=standing.gates.ask(gate, shown, at=at or now_text(), question=question))
+    require_eval(folder.root, gate, shown)
     save_standing(folder, updated)
     return updated
 
@@ -101,10 +104,15 @@ def answer_gate(film: FilmFolder | Path, gate: str, answer: Answer) -> Standing:
 
     A yes at the song gate also fingerprints the mix it approved, so a changed file is caught later; a yes at the
     spend gate copies the batch it approved from plan/budget.json (any answer there drops the batch before).
+    A yes at gates 5 and 6 is refused while the eval would refuse the gate now, with only the gate's own ask allowed
+    to have changed since the eval (so nothing can be edited between the question and the answer); a no is always
+    recorded.
     """
     folder = _folder(film)
     standing = load_standing(folder)
     book = standing.gates.answer(gate, answer)
+    if answer.approves:
+        require_eval(folder.root, gate, standing.gates.record(gate).shown, answering=True)
     song, batch = standing.song, standing.batch
     if gate == SONG_GATE and answer.approves:
         relative = str(read_film(folder).get("stems", {}).get("mix") or "")

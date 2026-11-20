@@ -27,7 +27,7 @@ def said(words, approves=True, scope="film", at=AT):
 
 @pytest.fixture
 def film(tmp_path):
-    return create_project(tmp_path, "atomic-sunshine", "Atomic Sunshine", created=CREATED)
+    return create_project(tmp_path, "glass-harbour", "Glass Harbour", created=CREATED)
 
 
 def write_mix(film, payload=b"RIFF fake mix"):

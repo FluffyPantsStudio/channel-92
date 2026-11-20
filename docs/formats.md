@@ -42,6 +42,13 @@ in `formats.py` and this page says what changed and how to move a file across.
 | `graph-map` | `<graph>.map.json` (`atomic_flix/runner/names.py`) | a person; ours are in `atomic_flix/workflows/` |
 | `fixture-truth`, `fixture-manifest` | `fixtures/*/truth.json`, `fixtures/first-film/manifest.json` | `tools/make_fixtures.py`, `tools/synth_song.py` |
 | `replay` | `replay.json` in a replay folder | `tools/replay_first_film.py` |
+| `eval` | `eval/report.json` (`docs/eval.md`) | `eval` |
+| `rules-map` | `atomic_flix/data/rules-map.json` | a person; a test keeps it whole |
+
+Optional fields added without a version change, since an old reader ignores them: a shot's `scene:` in the shot
+list, carried into its task as `"scene"`; and in a still's record (`stills/<key>.json`) `judge.at` (when the judge
+looked, ISO 8601), `size` ([width, height]), `props` ({prop: reference}), `master` and `look`, which the eval reads
+(`docs/eval.md`).
 
 The machine's job log, the film's job log and the job files gained the tag in every row or record; readers ignore
 it, so a log that mixes tagged and untagged rows reads as one.

@@ -7,6 +7,7 @@ and lists what happens in a cutaway or silent shot, in order. A `#` after a spac
     S02 vocal: v02 v03
       still: stills/S02.png
       setup: salt
+      scene: desert       (optional: shots of one scene share a master still, props, aspect and look)
       crop: 0.8
       place: a white salt desert
       act v02: her lips in a soft round oo
@@ -26,7 +27,8 @@ from .model import KINDS, PlanError, ShotSpec
 
 _TOP_ROW = re.compile(r"^(?P<key>[A-Za-z][\w-]*)\s+(?P<kind>[a-z]+)\s*(?::\s*(?P<lines>.*))?$")
 _FIELD = re.compile(r"^(?P<name>[a-z_]+)(?:\s+(?P<arg>[\w-]+))?\s*:\s*(?P<value>.*)$")
-_TEXT_FIELDS = ("still", "closing_still", "setup", "framing", "place", "goal", "cam_move", "pin", "at", "outfit")
+_TEXT_FIELDS = ("still", "closing_still", "setup", "framing", "place", "goal", "cam_move", "pin", "at", "outfit",
+                "scene")
 _YES = {"yes", "true", "y", "1"}
 _NO = {"no", "false", "n", "0"}
 

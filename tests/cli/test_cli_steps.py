@@ -30,7 +30,7 @@ def _new(tmp_path: Path, *extra: str) -> Path:
 def test_dry_run_reports_every_missing_input_and_writes_nothing(tmp_path, capsys):
     lyric = tmp_path / "lyric.txt"
     lyric.write_text(LYRIC, encoding="utf-8")
-    aim = tmp_path / "films" / "atomic-sunshine"
+    aim = tmp_path / "films" / "glass-harbour"
     assert main(["new", str(aim), "--lyric", str(lyric), "--dry-run"]) == 0
     out = capsys.readouterr().out
     assert not aim.exists()
@@ -44,10 +44,10 @@ def test_dry_run_reports_every_missing_input_and_writes_nothing(tmp_path, capsys
 def test_new_copies_stems_and_names_them_in_film_json(tmp_path):
     mix = tmp_path / "mix.wav"
     mix.write_bytes(b"RIFF fake")
-    film = _new(tmp_path, "--song", str(mix), "--star", "Frankie", "--who", "an android")
+    film = _new(tmp_path, "--song", str(mix), "--star", "Nova", "--who", "an android")
     data = json.loads((film / "film.json").read_text(encoding="utf-8"))
     assert data["stems"]["mix"] == "audio/mix.wav" and (film / "audio/mix.wav").read_bytes() == b"RIFF fake"
-    assert data["star"] == {"name": "Frankie", "who": "an android"}
+    assert data["star"] == {"name": "Nova", "who": "an android"}
     assert (film / "lyric.txt").read_text(encoding="utf-8") == LYRIC
 
 

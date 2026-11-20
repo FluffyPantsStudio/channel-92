@@ -1,6 +1,6 @@
 """Prompt text for renders and stills, written from the shots the person listed and the planned cuts.
 
-Sung shots copy the order our first film settled on across its 25 singing shots (flix/canon/frankie/singing):
+Sung shots copy the order our first film settled on across its 25 singing shots (its record of the sung shots):
 setting, standing behaviour, a single mood, a timeline of whole seconds, her face during the song, her appearance.
 Each point below was paid for in rejected takes:
 - quote her lyric word for word with the seconds it occupies, and put a period only where the stem goes silent;
@@ -22,7 +22,7 @@ from ..plan.words import sung_words
 
 TIGHT = 0.75
 DEFAULT_TONE = "serious and soulful"
-DEFAULT_STAR = "Frankie"
+DEFAULT_STAR = "Nova"
 EDGE_LINE = "The picture fills the whole frame edge to edge."
 NO_TEXT_LINE = "No text, no letters, no logos."
 KEEP_SCENE = "Colours, light and materials stay as in the first frame, and things move like real objects."

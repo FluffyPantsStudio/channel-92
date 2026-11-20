@@ -19,7 +19,7 @@ After that the command is `atomic-flix` (or `python -m atomic_flix.cli`). `atomi
 python tools/synth_song.py work/song
 atomic-flix new work/films/tiny-song --song work/song/mix.wav --voice work/song/voice.wav ^
     --band work/song/band.wav --drums work/song/drums.wav --lyric work/song/lyric.txt ^
-    --shots work/song/shots.txt --star Frankie --who "an android who sings for the band"
+    --shots work/song/shots.txt --star Nova --who "a singer with short silver hair"
 ```
 
 The synthetic song is 34 seconds at 111 BPM with four sung lines. `new` makes the folder from the template
@@ -73,6 +73,7 @@ of the hours (rule L127), and on anything else it finds.
 
 ```
 atomic-flix budget work/films/tiny-song       plan/budget.json: takes, size and GPU hours
+atomic-flix eval work/films/tiny-song         eval/report.json and report.md: WARN or CLEAN, not BLOCKED
 atomic-flix gate work/films/tiny-song ask spend
 atomic-flix gate work/films/tiny-song answer spend --by "Test Person" --words "yes, run it"
 atomic-flix lint work/films/tiny-song         now clear
@@ -82,6 +83,11 @@ The hours come from this machine's job log when it has renders of the same graph
 measured rates. The yes covers that batch only: its takes, frame size and hours are copied into `standing.json`,
 and `shoot` plans no more takes than it covers. A changed plan (re-run `budget` with other takes or size) or a
 second batch needs `gate ... reopen spend`, then a new ask and answer.
+
+Gate 5 is not asked until `eval` has a fresh report that is not BLOCKED for it: run `eval` after `budget`, since a
+report is stale once any file it read changes. The yes and `shoot` check it again, allowing only gate 5's own ask,
+answer and batch to have changed, so anything edited in between needs a new `eval`. Rules due at gate 6 (the prompts as sent, the cut's checks, the
+review rounds) are listed but do not hold gate 5. `docs/eval.md` says what the eval checks.
 
 ## 6. Shoot, place, cut, grade, review, compare
 
@@ -118,5 +124,9 @@ with `--hooks`: they are code from the film folder, so they are off by default, 
 named before it runs. `review` makes the boards a cold reviewer reads, from the graded
 film when there is one. `compare` sets the film's numbers beside
 the first film's.
+
+Before gate 6, `eval` again: in this run it says BLOCKED, because no cold review round is on record yet
+(`LG-ROUNDS`) and the synthetic stills carry no time for the judge's look (`LG-JUDGE`). Gate 6 waits until a fresh
+report is not BLOCKED for it.
 
 `atomic-flix progress FILM` shows the next gate and anything missing or stale at any point.

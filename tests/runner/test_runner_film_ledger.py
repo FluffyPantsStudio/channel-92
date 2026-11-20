@@ -18,7 +18,7 @@ def _runner(film_dir, hosts, tmp_path) -> Runner:
 
 
 def _sung(key, graph) -> Request:
-    return Request(key=key, graph=str(graph), wording=f"Frankie sings {key}", seconds=9, vocal=True,
+    return Request(key=key, graph=str(graph), wording=f"Nova sings {key}", seconds=9, vocal=True,
                    inputs={"opening_still": f"stills/{key}.png", "audio": f"plan/{key}.voice-soft.wav"})
 
 

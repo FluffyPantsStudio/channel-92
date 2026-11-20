@@ -36,8 +36,9 @@ Environment variables (all optional):
 
 `atomic-flix new FILM --song mix.wav --voice voice.wav --band band.wav --drums drums.wav --lyric lyric.txt` makes the
 film folder; `atomic-flix progress FILM` always says what is next and what is missing or stale. Verbs in order:
-`time`, `bars`, `plan`, `lint`, `budget`, `shoot`, `place`, `cut`, `grade`, `review`, `compare`. Every stage reads and
-writes plain JSON in the film's folder, so stop anywhere, look, edit, go on. `atomic-flix VERB --help` explains one.
+`time`, `bars`, `plan`, `lint`, `budget`, `eval`, `shoot`, `place`, `cut`, `grade`, `review`, `compare`, with `eval`
+again before gate 6. Every stage reads and writes plain JSON in the film's folder, so stop anywhere, look, edit, go
+on. `atomic-flix VERB --help` explains one.
 
 ## 3. Rules an agent must not break
 
@@ -66,6 +67,14 @@ another job's files. Restart only an instance whose queue is empty.
 prompt, no smile on a singing mouth, one mood word, no grain in masters, and so on). Fix the cause; do not edit the
 rules to pass. Nine questions are answered by a person or a cold reviewer (hands, mouth, marks, identity, gaze,
 build, never-list, prop, flat areas); the preflight stays blocked until they are.
+
+**The eval holds gates 5 and 6.** `atomic-flix eval FILM` checks that the film obeyed the rules, not only that the
+rules work: lint on the real book and on the prompts as they were sent, the never-words in what was sent, the gate
+and review ledger, scene continuity, and the cut's own checks, into `eval/report.json` and `report.md`. Gates 5 and 6
+are refused, at the question, at a yes and (gate 5) before `shoot`, while the report is missing, stale or BLOCKED for
+that gate. CLEAN means nothing the kit can check fails, not that every rule held. Run it last before asking, change
+nothing between the question and the answer, fix what it lists, and never edit `data/rules-map.json`, a check or the
+report to make a film pass; a rule nothing can check is a gap the report names (`docs/eval.md`).
 
 **Grain and licences.** Never put grain or film-stock words in a prompt and never grade grain into a master; add it in
 post. Say plainly where the output is AI-made, and follow the licence of every model you load (several open video

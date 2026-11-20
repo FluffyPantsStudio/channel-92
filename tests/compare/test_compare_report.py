@@ -61,7 +61,7 @@ def baseline_path(tmp_path):
 
 
 @pytest.fixture
-def film(tmp_path):
+def film(tmp_path, no_eval_hook):
     film = create_project(tmp_path, "second", "Second Film", created=CREATED)
     (film.root / "audio" / "mix.wav").write_bytes(b"mix")
     for spec in GATES[:-1]:

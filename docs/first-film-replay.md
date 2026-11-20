@@ -11,7 +11,7 @@ The folder that holds the first film's working tree:
 | Under `FLIX_FIRST_FILM` | Read by |
 |---|---|
 | `films/the-girl-in-the-magic-tub/` (stems, `build/`, `book.json`, `lyric.txt`, `takes/`, `v24-cut.mp4`) | `tools/make_fixtures.py first-film`, `tools/replay_first_film.py`, the place, grade and replay tests |
-| `canon/frankie/singing/shots.json` (the sung shots' prompts as the picked takes were made) | `tests/lint/test_first_film_regression.py` |
+| `canon/<singer>/singing/shots.json` (the sung shots' prompts as the picked takes were made) | `tests/lint/test_first_film_regression.py` |
 | `workflows/` (our ComfyUI graphs) | `tests/runner/test_runner_template.py` (the graph filled through its name map) |
 | `baseline.json` (the first film's measured numbers) | `tools/replay_first_film.py` |
 | `../src/data/songs.ts` (the site catalog) | `tools/lyric_from_site.py`, as in `tools/new_song_checklist.md` |

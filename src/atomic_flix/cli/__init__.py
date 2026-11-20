@@ -10,12 +10,12 @@ from __future__ import annotations
 import sys
 from typing import Callable, Sequence
 
-from . import cut_steps, grade_steps, project_steps, shoot_steps, sound_steps
+from . import cut_steps, eval_steps, grade_steps, project_steps, shoot_steps, sound_steps
 from .common import StepError
 
 Handler = Callable[[Sequence[str]], int]
-FILM_ORDER = ("new", "progress", "gate", "time", "bars", "plan", "lint", "budget", "shoot", "place", "cut", "grade",
-              "review", "compare")
+FILM_ORDER = ("new", "progress", "gate", "time", "bars", "plan", "lint", "budget", "eval", "shoot", "place", "cut",
+              "grade", "review", "compare")
 
 
 def _load_stage(name: str) -> Handler:
@@ -56,7 +56,7 @@ def _folder_verbs(argv: Sequence[str]) -> int:
 
 
 STEPS: dict[str, tuple[str, Handler]] = {
-    **project_steps.COMMANDS, **sound_steps.COMMANDS, **shoot_steps.COMMANDS,
+    **project_steps.COMMANDS, **sound_steps.COMMANDS, **shoot_steps.COMMANDS, **eval_steps.COMMANDS,
     "plan": ("plan cuts on the bar, each shot's slice, gated voice and prompts (plan/)", _plan),
     "cut": (cut_steps.COMMANDS["cut"][0], _either(cut_steps.COMMANDS["cut"][1], "cut", ("audit", "encode", "flash"))),
     "grade": (grade_steps.COMMANDS["grade"][0],
@@ -82,7 +82,8 @@ def overview() -> str:
     lines += ["", "Stage modules (the film verbs `plan` to `compare` above are modules too):"]
     lines += [f"  {name:<9} {about}" for name, (about, _) in MODULES.items()]
     lines += ["", "A person decides at six gates (concept, the song by ear, her face, the board, render hours, v1);",
-              "`shoot` refuses until gate 5 holds the person's yes. See docs/quickstart.md for a whole run."]
+              "`shoot` refuses until gate 5 holds the person's yes, and gates 5 and 6 are not asked until a",
+              "fresh `eval` is not BLOCKED for them. See docs/quickstart.md for a whole run."]
     return "\n".join(lines)
 
 

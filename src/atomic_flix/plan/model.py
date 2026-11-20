@@ -84,6 +84,7 @@ class ShotSpec:
     at: str | None = None
     late_in: float | None = None
     outfit: str | None = None
+    scene: str | None = None        # shots of one scene share a master still, prop references, aspect and look
     takes: int | None = None
     extra: Mapping[str, str] = field(default_factory=dict)
 

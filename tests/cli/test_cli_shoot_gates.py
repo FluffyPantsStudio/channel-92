@@ -18,6 +18,8 @@ from atomic_flix.project import (FilmFolder, ProjectError, answer_gate, ask_gate
 from atomic_flix.runner import __main__ as runner_main
 from atomic_flix.runner.shoot import Request, plan_batch
 
+pytestmark = pytest.mark.usefixtures("no_eval_hook")    # gate bookkeeping on bare folders; the hook: tests/eval
+
 AT = "2026-11-19T10:00:00+00:00"
 PLAN = {"takes": 4, "size": [1280, 704], "busy_s": 3600.0}
 SUNG = {"6": {"class_type": "CLIPTextEncode", "inputs": {"text": "$wording"}},

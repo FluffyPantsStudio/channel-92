@@ -153,6 +153,8 @@ def plan_film(shots: Sequence[ShotSpec], lines: Sequence[Line] | Mapping[str, Li
         if cut.note:
             task["notes"] = [f"cut: {cut.note}"] + task["notes"]
             notes.append(f"{shot.key}: {cut.note}")
+        if shot.scene:
+            task["scene"] = shot.scene         # optional; a task without it belongs to no scene
         tasks[shot.key] = task
     notes.extend(_size_notes(shots))
     return Plan(cuts=cuts, tasks=tasks, notes=notes, ends_at=ends_at)

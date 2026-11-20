@@ -7,6 +7,7 @@ kit's own test data is synthetic; the first film's data never sits in this repos
 
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
@@ -33,3 +34,21 @@ def under_root(*parts: str) -> Path | None:
     """A path under FLIX_FIRST_FILM, or None when the variable is unset."""
     root = flix_root()
     return root.joinpath(*parts) if root is not None else None
+
+
+def first_film_star() -> str | None:
+    """The singer's name as the first film's own book gives it (`character`), so no name is written in this repo;
+    None without the film or the field."""
+    folder = film_folder()
+    book = folder / "book.json" if folder is not None else None
+    if book is None or not book.is_file():
+        return None
+    name = json.loads(book.read_text(encoding="utf-8")).get("character")
+    return name if isinstance(name, str) and name.strip() else None
+
+
+def sung_record() -> Path | None:
+    """The first film's record of its sung shots (`canon/<singer>/singing/shots.json`), or None without it."""
+    canon = under_root("canon")
+    found = sorted(canon.glob("*/singing/shots.json")) if canon is not None and canon.is_dir() else []
+    return found[0] if found else None

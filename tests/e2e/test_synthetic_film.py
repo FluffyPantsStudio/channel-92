@@ -71,7 +71,7 @@ def test_a_tiny_film_from_stems_to_compare(tmp_path, song, capsys):
 
     run("new", film, "--song", provenance / "mix.wav", "--voice", provenance / "voice.wav", "--band", provenance / "band.wav",
         "--drums", provenance / "drums.wav", "--lyric", provenance / "lyric.txt", "--shots", provenance / "shots.txt",
-        "--star", "Frankie", "--who", "an android who sings for the band")
+        "--star", "Nova", "--who", "a singer with short silver hair")
     data = json.loads((film / "film.json").read_text(encoding="utf-8"))
     data.update({"frame": [320, 192], "final_size": [320, 192], "batch": {"takes": 1, "cards": 1},
                  "wardrobe": {"main": "wearing a white jacket over a black top"}})
@@ -100,6 +100,10 @@ def test_a_tiny_film_from_stems_to_compare(tmp_path, song, capsys):
     assert "L127" in capsys.readouterr().out
     run("budget", film)
     assert json.loads((film / "plan/budget.json").read_text(encoding="utf-8"))["takes"] == 5
+    assert main(["gate", str(film), "ask", "spend"]) == 2       # gate 5 waits for a fresh eval
+    run("eval", film)
+    report = json.loads((film / "eval/report.json").read_text(encoding="utf-8"))
+    assert report["verdicts"]["spend"] != "BLOCKED", report["blocking"]["spend"]
     gate(film, "spend", "yes, run it")
     run("lint", film)
 
@@ -141,6 +145,13 @@ def test_a_tiny_film_from_stems_to_compare(tmp_path, song, capsys):
 
     run("review", film)
     assert (film / "review/v01/MANIFEST.txt").is_file()
+
+    run("eval", film, expect=1)                     # before v1: no cold review round yet, no judge times
+    report = json.loads((film / "eval/report.json").read_text(encoding="utf-8"))
+    assert report["stage"] == "v1" and "LG-ROUNDS film" in report["blocking"]["v1"]
+    verdicts = {row["rule"]: row["verdict"] for row in report["rows"] if row["rule"].startswith("CT-")}
+    assert verdicts["CT-AUDIT"] == verdicts["CT-GRADE"] == verdicts["CT-GRAIN"] == verdicts["CT-FLASH"] == "pass"
+    assert main(["gate", str(film), "ask", "v1", "--shown", "cuts/v01-toned.mp4"]) == 2
 
     baseline = tmp_path / "baseline.json"
     baseline.write_text(json.dumps(BASELINE), encoding="utf-8")

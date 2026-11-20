@@ -20,6 +20,7 @@ VERSIONS: dict[str, int] = {
     "edit": 1, "audit": 1, "strobe": 1, "tone": 1, "review": 1,
     "scene": 1, "scene-plan": 1, "scene-lock": 1, "scene-job": 1, "viewpoint": 1, "capture": 1, "controls": 1,
     "graph-meta": 1, "graph-map": 1, "fixture-truth": 1, "fixture-manifest": 1, "replay": 1,
+    "eval": 1, "rules-map": 1,
 }
 
 

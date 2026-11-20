@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 from typing import Sequence
 
+from ..eval.hook import eval_refusal
 from ..gates import GateRefused
 from ..lint import load_book, preflight, vet
 from ..lint.report import write_reports
@@ -176,7 +177,8 @@ def pending_jobs(film_root: Path, keys: Sequence[str] | None = None) -> list[dic
 
 
 def clear_to_shoot(film: Film, keys: Sequence[str] | None = None):
-    """Refuse (StepError) unless gate 5 holds the person's yes, every planned job was planned under that yes, and
+    """Refuse (StepError) unless gate 5 holds the person's yes, every planned job was planned under that yes, the eval
+    report is fresh and not BLOCKED for gate 5 (only gate 5's own ask, answer and batch may have changed since), and
     lint is clear; return the checked lint book. Both `shoot` command lines call this first."""
     try:
         require_gate(film.folder, "spend")
@@ -189,6 +191,9 @@ def clear_to_shoot(film: Film, keys: Sequence[str] | None = None):
     if strays:
         raise StepError(f"{', '.join(strays)} were planned outside gate 5's latest yes (an earlier answer, or none); "
                         "the person's yes covers only takes planned under it")
+    refusal = eval_refusal(film.root, "spend", answering=True)
+    if refusal:
+        raise StepError(f"{refusal} (the yes at gate 5 covers the film as it was evaluated)")
     book = load_checked_book(film)
     if preflight(book).blocked:
         raise StepError("lint blocks this batch; run `atomic-flix lint` and fix what it lists")

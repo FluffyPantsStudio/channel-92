@@ -37,11 +37,11 @@ def make_film(root, shots=SHOTS):
     save_wav(root / "audio" / "voice.wav", voice, rate)
     save_wav(root / "audio" / "mix.wav", voice * 0.5, rate)
     sha = hashlib.sha256((root / "audio" / "mix.wav").read_bytes()).hexdigest()
-    film = {"name": "Test Tub", "star": {"name": "Frankie", "who": "an android singer with red curls"},
+    film = {"name": "Test Tub", "star": {"name": "Nova", "who": "an android singer with red curls"},
             "wardrobe": {"eighties": "wearing a white 1980s jacket with wide padded shoulders over a black top"},
             "tone": "serious and soulful", "stems": {"mix": "audio/mix.wav", "voice": "audio/voice.wav"},
             "downbeat_slot": 0, "ends_at": 22.0, "look": "photo",
-            "characters": {"Frankie": {"identity": "refs/front.png", "hero": "refs/front.png", "body": "refs/body.png"}},
+            "characters": {"Nova": {"identity": "refs/front.png", "hero": "refs/front.png", "body": "refs/body.png"}},
             "gates": {"song": {"sha256": sha}, "look": {"words": "yes, that is her"},
                       "spend": {"budget_s": 100000}},
             "batch": {"takes": 2, "cards": 2}}
@@ -61,7 +61,7 @@ def make_film(root, shots=SHOTS):
         (root / "stills" / f"{key}.png").write_bytes(b"png placeholder")
         record = {"judge": {"verdict": "PASS", "full_size": True, "items": PASS_ALL}}
         if key == "S01":
-            record.update({"figures": ["Frankie"], "refs": ["refs/front.png", "refs/body.png"]})
+            record.update({"figures": ["Nova"], "refs": ["refs/front.png", "refs/body.png"]})
         (root / "stills" / f"{key}.json").write_text(json.dumps(record), encoding="utf-8")
     return root
 

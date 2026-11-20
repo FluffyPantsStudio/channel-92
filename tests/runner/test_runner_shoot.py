@@ -22,7 +22,7 @@ def _request(key: str, graph, vocal: bool = True, **extra) -> Request:
     inputs = {"opening_still": f"stills/{key}.png"}
     if vocal:
         inputs["audio"] = f"plan/{key}.voice-soft.wav"
-    return Request(key=key, graph=str(graph), wording=f"Frankie sings {key}", inputs=inputs, seconds=9,
+    return Request(key=key, graph=str(graph), wording=f"Nova sings {key}", inputs=inputs, seconds=9,
                    vocal=vocal, **extra)
 
 

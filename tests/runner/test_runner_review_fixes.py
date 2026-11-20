@@ -25,7 +25,7 @@ FAST = 0.02
 def _request(key: str, graph, **extra) -> Request:
     inputs = {"opening_still": f"stills/{key}.png", "audio": f"plan/{key}.voice-soft.wav"}
     inputs.update(extra.pop("inputs", {}))
-    return Request(key=key, graph=str(graph), wording=f"Frankie sings {key}", inputs=inputs, seconds=9, vocal=True,
+    return Request(key=key, graph=str(graph), wording=f"Nova sings {key}", inputs=inputs, seconds=9, vocal=True,
                    **extra)
 
 

@@ -17,9 +17,9 @@ CREATED = "2026-11-20T09:00:00+00:00"
 
 
 def test_creates_every_folder_and_starter_file(tmp_path):
-    film = create_project(tmp_path, "atomic-sunshine", "Atomic Sunshine", created=CREATED)
+    film = create_project(tmp_path, "glass-harbour", "Glass Harbour", created=CREATED)
     assert isinstance(film, FilmFolder)
-    assert film.root == tmp_path / "atomic-sunshine"
+    assert film.root == tmp_path / "glass-harbour"
     for name, _purpose in FOLDERS:
         assert (film.root / name).is_dir(), name
     for path in (film.film, film.lyric, film.notes, film.standing, film.job_log):
@@ -38,16 +38,16 @@ def test_film_file_is_utf8_json_in_the_spec_shape(tmp_path):
 
 
 def test_notes_open_with_the_film_name(tmp_path):
-    film = create_project(tmp_path, "atomic-sunshine", "Atomic Sunshine", created=CREATED)
+    film = create_project(tmp_path, "glass-harbour", "Glass Harbour", created=CREATED)
     text = film.notes.read_text(encoding="utf-8")
-    assert text.startswith("# Atomic Sunshine")
+    assert text.startswith("# Glass Harbour")
     assert "word for word" in text
 
 
 def test_state_file_says_the_concept_gate_is_next(tmp_path):
-    film = create_project(tmp_path, "atomic-sunshine", "Atomic Sunshine", created=CREATED)
+    film = create_project(tmp_path, "glass-harbour", "Glass Harbour", created=CREATED)
     standing = load_standing(film)
-    assert standing.film == "Atomic Sunshine"
+    assert standing.film == "Glass Harbour"
     assert standing.created == CREATED
     assert standing.gates.next_gate().id == "concept"
     assert standing.song is None
@@ -57,7 +57,7 @@ def test_state_file_says_the_concept_gate_is_next(tmp_path):
     assert "Which pitch is the film?" in summary
 
 
-@pytest.mark.parametrize("slug", ["Atomic Sunshine", "atomic_sunshine", "-x", "x-", "", "a/b", ".."])
+@pytest.mark.parametrize("slug", ["Glass Harbour", "glass_harbour", "-x", "x-", "", "a/b", ".."])
 def test_bad_slugs_are_refused(tmp_path, slug):
     with pytest.raises(ProjectError):
         create_project(tmp_path, slug, "A Film", created=CREATED)

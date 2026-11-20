@@ -8,7 +8,7 @@ from atomic_flix.runner.__main__ import main
 
 
 def _batch(tmp_path, film_dir, graph) -> str:
-    batch = {"requests": [{"key": "S02", "graph": str(graph), "wording": "Frankie sings", "seconds": 9, "vocal": True,
+    batch = {"requests": [{"key": "S02", "graph": str(graph), "wording": "Nova sings", "seconds": 9, "vocal": True,
                            "inputs": {"opening_still": "stills/S02.png", "audio": "plan/S02.voice-soft.wav"}}]}
     path = tmp_path / "batch.json"
     path.write_text(json.dumps(batch), encoding="utf-8")

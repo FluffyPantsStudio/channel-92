@@ -14,6 +14,9 @@ from types import MappingProxyType
 from typing import Mapping, Sequence
 
 from ..plan import Line, Pulse, ShotSpec, lines_from_json, parse_shot_list, pulse_from_json
+from ..runner.names import KIT_MAPS
+from ..runner.places import film_file, inside
+from ..runner.template import TemplateError
 
 
 @dataclass
@@ -42,7 +45,10 @@ class Book:
         if self.files is not None:
             return path in self.files
         if self.root is not None:
-            return (self.root / path).exists()
+            try:
+                return film_file(self.root, path, "file").exists()
+            except TemplateError:
+                return False            # a path outside the film folder counts as missing; it is never read
         return True
 
     def shot(self, key: str) -> ShotSpec:
@@ -69,7 +75,7 @@ def _line(data: Mapping) -> Line:
                 provenance=data.get("provenance", "level"), flags=tuple(data.get("flags", [])))
 
 
-DEFAULT_FILM = {"name": "Test Film", "star": {"name": "Frankie"}, "tone": "serious and soulful",
+DEFAULT_FILM = {"name": "Test Film", "star": {"name": "Nova"}, "tone": "serious and soulful",
                 "wardrobe": {"main": "wearing a white jacket over a black top"}, "look": "photo"}
 DEFAULT_LINE = {"key": "v01", "text": "la la la", "start": 10.4, "end": 13.6}
 
@@ -148,13 +154,26 @@ def sha256_of(path: Path) -> str | None:
     return digest.hexdigest()
 
 
+def graph_sidecar(root: Path, graph: object) -> Path:
+    """The `.meta.json` beside a task's graph, which lies in the film folder or the kit's graphs; TemplateError when
+    the graph is not a path or lies anywhere else."""
+    if not isinstance(graph, str) or not graph.strip():
+        raise TemplateError(f"graph {graph!r} is not a path")
+    given = Path(graph)
+    aim = inside(given, (root, KIT_MAPS), "graph") if given.anchor else film_file(root, given, "graph")
+    return aim.with_suffix(".meta.json")
+
+
 def load_book(root: Path) -> Book:
     """Everything a film folder holds that the checks read."""
     root = Path(root)
     film = _read(root / "film.json")
     if film is None:
         raise FileNotFoundError(f"{root / 'film.json'} not found")
-    shots = parse_shot_list((root / film.get("lineup_rows", "shots.txt")).read_text(encoding="utf-8"))
+    if not isinstance(film, dict) or not isinstance(film.get("stems") or {}, dict):
+        raise ValueError("film.json must hold one object, with stems as an object")
+    lineup = film_file(root, film.get("lineup_rows") or "shots.txt", "lineup_rows")
+    shots = parse_shot_list(lineup.read_text(encoding="utf-8"))
     voice_lines = _read(root / "analysis" / "voice-lines.json") or {}
     lines = {line.key: line for line in lines_from_json(voice_lines)}
     pulse_data = _read(root / "analysis" / "pulse.json")
@@ -176,11 +195,11 @@ def load_book(root: Path) -> Book:
     for task in tasks.values():
         graph = task.get("graph")
         if graph and graph not in graphs:
-            graphs[graph] = _read(root / Path(graph).with_suffix(".meta.json")) or {}
+            graphs[graph] = _read(graph_sidecar(root, graph)) or {}
     mix = (film.get("stems") or {}).get("mix")
     rules_dir = root / "rules"
     return Book(film=film, shots=shots, tasks=tasks, prompts=prompts, still_prompts=still_prompts, keyframes=keyframes,
                 lines=lines, pulse=pulse, cuts=(_read(plan_dir / "cuts.json") or {}).get("cuts", []),
                 ends_at=film.get("ends_at"), sung_db=voice_lines.get("sung_db"),
-                song_sha256=sha256_of(root / mix) if mix else None, graphs=graphs,
+                song_sha256=sha256_of(film_file(root, mix, "stems.mix")) if mix else None, graphs=graphs,
                 batch=dict(film.get("batch") or {}), root=root, rules_dir=rules_dir if rules_dir.exists() else None)

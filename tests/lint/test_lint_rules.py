@@ -68,8 +68,8 @@ def test_findings_name_the_shot():
 
 
 def test_reviewer_questions_are_listed_with_the_still_and_not_answered_for_the_person():
-    book = book_from_case({"film": {"characters": {"Frankie": {"identity": "refs/front.png"}}},
-                           "still": {"figures": ["Frankie"]}})
+    book = book_from_case({"film": {"characters": {"Nova": {"identity": "refs/front.png"}}},
+                           "still": {"figures": ["Nova"]}})
     verdict = preflight(book)
     awaiting = {item.id for item in verdict.review if item.key == "S01" and item.answer is None}
     assert {"hands", "mouth", "identity", "gaze", "flat"} <= awaiting

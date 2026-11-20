@@ -33,6 +33,18 @@ def graph_file(film_dir: str | Path, graph: str | Path, what: str = "graph") -> 
     return aim
 
 
+def film_file(film_dir: str | Path, relative: object, what: str) -> Path:
+    """RELATIVE resolved inside the film folder; TemplateError for anything but a relative path with no `..` part that
+    stays inside FILM_DIR once links are followed. Readers of a film's own files (lint's book, the eval) use this, so
+    a path written into film.json or a task never makes them read outside the film."""
+    if not isinstance(relative, (str, Path)) or not str(relative).strip():
+        raise TemplateError(f"{what}: {relative!r} is not a path")
+    given = Path(relative)
+    if given.anchor or ".." in given.parts:
+        raise TemplateError(f"{what} {relative} must be a relative path inside the film folder, without `..`; refused")
+    return inside(Path(film_dir) / given, (film_dir,), what)
+
+
 def input_file(film_dir: str | Path, relative: str | Path, what: str) -> Path:
     """An input's path inside the film folder (RELATIVE is read from the film folder)."""
     return inside(Path(film_dir) / relative, (film_dir,), what)

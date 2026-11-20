@@ -8,7 +8,7 @@ from atomic_flix.plan import Line, Pulse, ShotSpec, plan_film
 from atomic_flix.prompts import (edit_prompt, plate_prompt, silent_prompt, still_prompt, sung_prompt,
                                  sung_words, framing_phrase, is_wordless)
 
-FILM = {"name": "Magic Tub", "star": {"name": "Frankie", "who": "an android singer with red curly hair"},
+FILM = {"name": "Magic Tub", "star": {"name": "Nova", "who": "an android singer with red curly hair"},
         "wardrobe": {"eighties": "wearing a white 1980s jacket with wide padded shoulders over a black top"},
         "tone": "serious and soulful"}
 
@@ -29,9 +29,9 @@ def sung_case(text="Hush now, the tub is warm", crop=1.0, acts=None):
 def test_sung_prompt_follows_the_recipe_in_order():
     shot, task, lines = sung_case()
     text = sung_prompt(FILM, shot, task, lines)
-    order = ["Frankie sings to us from a white salt desert.", "she never turns away",
+    order = ["Nova sings to us from a white salt desert.", "she never turns away",
              "Her manner is serious and soulful.", '"Hush now, the tub is warm"',
-             "her mouth only shapes the words", "Frankie looks just as she does in the first frame"]
+             "her mouth only shapes the words", "Nova looks just as she does in the first frame"]
     positions = [text.index(piece) for piece in order]
     assert positions == sorted(positions)
     assert "from the chest up" in text

@@ -20,7 +20,7 @@ def said(words="yes"):
 
 @pytest.fixture
 def film(tmp_path):
-    return create_project(tmp_path, "atomic-sunshine", "Atomic Sunshine", created=CREATED)
+    return create_project(tmp_path, "glass-harbour", "Glass Harbour", created=CREATED)
 
 
 def touch(path, when, payload=b"x"):

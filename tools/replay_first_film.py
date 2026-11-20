@@ -64,14 +64,14 @@ def build_project(args, work: Path, book: dict) -> Film:
     (inputs / "shots.txt").write_text(steps.replay_shots(args.shots.read_text(encoding="utf-8")), encoding="utf-8")
     root = work / "girl-in-the-magic-tub"
     command = ["new", root, "--name", "Girl In The Magic Tub (replay)", "--lyric", inputs / "lyric.txt",
-               "--shots", inputs / "shots.txt", "--star", "Frankie", "--who", book["subject"]]
+               "--shots", inputs / "shots.txt", "--star", book["character"], "--who", book["subject"]]
     for flag, name in STEMS.items():
         command += [f"--{flag}", FIXTURE / "audio" / name]
     assert kit([str(c) for c in command]) == 0
     film = Film.open(root)
     data = {**film.data, "frame": [1280, 704], "final_size": [1280, 720], "ends_at": ENDS_AT,
             "tone": "serious and soulful", "wardrobe": {"eighties": book["looks"]["eighties"]},
-            "allow": ["Frankie"], "world": book.get("world")}
+            "allow": [book["character"]], "world": book.get("world")}
     for shot in book["shots"]:
         still = args.film_src / "frames" / f"{shot['id']}.png"
         if still.is_file():

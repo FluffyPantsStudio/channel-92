@@ -17,21 +17,26 @@ import pytest
 from atomic_flix.lint import book_from_case, book_from_plan, check_rule, preflight, run_rules
 from atomic_flix.plan import Line, Pulse, parse_shot_list, plan_film
 from atomic_flix.prompts import write_prompts
-from first_film_env import PRIVATE, UNSET, under_root
+from first_film_env import PRIVATE, UNSET, first_film_star, flix_root
+from first_film_env import sung_record as sung_record_path
 
 pytestmark = pytest.mark.first_film
 
 REPO = Path(__file__).resolve().parents[2]
 BUILD = REPO / "fixtures" / "first-film" / "build"
-SUNG = under_root("canon", "frankie", "singing", "shots.json")
+SUNG = sung_record_path()
+STAR = first_film_star()
 SHOT_LIST = PRIVATE / "first_film_shots.txt"
 ENDS_AT = 278.7
-FILM = {"name": "Girl In The Magic Tub", "star": {"name": "Frankie", "who": "an android singer"},
+FILM = {"name": "Girl In The Magic Tub", "star": {"name": STAR, "who": "an android singer"},
         "tone": "serious and soulful", "look": "photo",
         "wardrobe": {"eighties": "wearing a white 1980s jacket with wide padded shoulders over a black top"}}
 
-if SUNG is None:
+if flix_root() is None:
     pytest.skip(UNSET, allow_module_level=True)
+if SUNG is None or STAR is None:
+    pytest.skip("the first film's sung record or its book (with the singer's name) is not on this machine",
+                allow_module_level=True)
 if not (BUILD / "lines.json").exists():
     pytest.skip("fixtures/first-film is missing: run tools/make_fixtures.py first-film", allow_module_level=True)
 if not SUNG.is_file() or not SHOT_LIST.is_file():
@@ -69,7 +74,7 @@ def film():
     lines = first_film_lines()
     shots = parse_shot_list(SHOT_LIST.read_text(encoding="utf-8"))
     pulse = Pulse(beats=first_film_beats(), downbeat_slot=0)
-    plan = plan_film(shots, lines, pulse, ends_at=ENDS_AT, names=["Frankie"])
+    plan = plan_film(shots, lines, pulse, ends_at=ENDS_AT, names=[STAR])
     take_files, keyframes = write_prompts(FILM, shots, plan.tasks, {line.key: line for line in lines})
     return {"lines": lines, "shots": shots, "pulse": pulse, "plan": plan, "clip_prompts": take_files, "keyframes": keyframes}
 
