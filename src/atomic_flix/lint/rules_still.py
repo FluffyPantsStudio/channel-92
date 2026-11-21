@@ -8,6 +8,7 @@ are right in the picture is never guessed here: a judge or the person answers th
 from __future__ import annotations
 
 from ..aspects import ASPECTS, matches_aspect
+from ..cast import cast_of, missing_views, required_views, views_of
 from .book import Book
 from .registry import rule
 
@@ -57,6 +58,8 @@ def smiling_still(book):
 def not_from_hero(book):
     figures = book.film.get("characters") or {}
     for shot, record in _records(book):
+        if shot.view and shot.view != "front":
+            continue                      # seen from another angle: CHR3 asks for that angle's view, not the hero
         refs = set((record or {}).get("refs") or [])
         for name in (record or {}).get("figures") or []:
             hero = (figures.get(name) or {}).get("hero")
@@ -120,12 +123,15 @@ def prop_without_reference(book):
 
 @rule("L022")
 def identity_missing(book):
-    figures = book.film.get("characters") or {}
+    figures = cast_of(book.film)
     for shot, record in _records(book):
         refs = set((record or {}).get("refs") or [])
         for name in (record or {}).get("figures") or []:
             person = figures.get(name) or {}
-            identity = person.get("identity") or person.get("hero")
+            if shot.view and shot.view != "front":
+                identity = views_of(person).get(shot.view)      # seen from the side or back: that view is the identity
+            else:
+                identity = person.get("identity") or person.get("hero") or views_of(person).get("front")
             if not identity or identity not in refs:
                 yield shot.key, f"shows {name} with no identity reference"
 
@@ -159,3 +165,71 @@ def picture_shape(book):
         size = book.pictures.get(shot.key)
         if size is not None and not matches_aspect(size[0], size[1], chosen):
             yield shot.key, f"the still is {_shape(*size)}, not the chosen {chosen}"
+
+
+@rule("CHR1")
+def sheet_incomplete(book):
+    """Every character has a reference sheet: one picture per view, each a file in the film folder."""
+    for name, person in cast_of(book.film).items():
+        absent = missing_views(person, book.rules_dir)
+        if absent:
+            yield None, f"{name}'s sheet has no {', '.join(absent)} view"
+        for view, path in views_of(person).items():
+            if not book.exists(path):
+                yield None, f"{name}'s {view} view {path} is not in the film folder"
+
+
+def _measured(book: Book):
+    """(name, view, path, measurement) for every sheet picture the film names and the folder holds."""
+    for name, person in cast_of(book.film).items():
+        for view, path in views_of(person).items():
+            if path in book.plain:
+                yield name, view, path, book.plain[path]
+
+
+@rule("CHR2")
+def sheet_has_environment(book):
+    """Every view is the figure alone on a plain studio backdrop: a coarse screen measured on the picture (a busy
+    place fails; a flat-coloured wall is for the judge and the person at gate 3)."""
+    for name, view, path, found in _measured(book):
+        if isinstance(found, str):
+            yield None, (f"{name}'s {view} view cannot be checked for a plain background ({found}); save it as an "
+                         "8-bit RGB PNG, not interlaced or indexed")
+        elif found.environment():
+            yield None, f"{name}'s {view} view {path}: {found.environment()}"
+
+
+@rule("CHR4")
+def figure_too_small(book):
+    """Every view is a tall portrait picture the figure fills, not a figure standing small in a wide frame."""
+    for name, view, path, found in _measured(book):
+        if not isinstance(found, str) and found.small():
+            yield None, f"{name}'s {view} view {path} {found.small()}"
+
+
+def _view_problem(book: Book, shot, record: dict, name: str) -> str | None:
+    views = views_of(cast_of(book.film).get(name) or {})
+    refs = set(record.get("refs") or [])
+    if shot.view not in required_views(book.rules_dir):
+        return f"view {shot.view!r} is not one of {', '.join(required_views(book.rules_dir))}"
+    wanted = views.get(shot.view)
+    if not wanted:
+        return f"{name} has no {shot.view} view on the sheet"
+    if wanted not in refs:
+        return f"is seen from the {shot.view} but {name}'s still lacks the {shot.view} view {wanted}"
+    front = views.get("front")
+    if shot.view == "back" and front and front in refs:
+        return f"is seen from the back but {name}'s still carries the front view {front}, whose face is copied onto it"
+    return None
+
+
+@rule("CHR3")
+def still_without_its_view(book):
+    """A still seen from an angle takes that angle's reference, and a back view never carries the front face."""
+    for shot, record in _records(book):
+        if not shot.view or not record:
+            continue
+        for name in record.get("figures") or []:
+            problem = _view_problem(book, shot, record, name)
+            if problem:
+                yield shot.key, problem

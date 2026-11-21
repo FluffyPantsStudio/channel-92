@@ -33,7 +33,8 @@ GATES: tuple[GateSpec, ...] = (
              "measurement of it",
              "Is this the finished song, with the click on the one where you count it?"),
     GateSpec("looks", 3, "her face and looks",
-             "the reference sheet and one or two first frames, at full size",
+             "the character sheets (every view, the figure alone on a plain background) and one or two first "
+             "frames, at full size",
              "Is this her?"),
     GateSpec("board", 4, "the board",
              "every shot's first frame, its time on the song and its lines, on one sheet",

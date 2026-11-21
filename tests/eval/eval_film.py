@@ -19,6 +19,7 @@ from atomic_flix.plan.__main__ import main as plan_main
 from atomic_flix.project import BatchApproval, SongPrint, Standing, create_project, save_standing
 from atomic_flix.runner.jobs import DONE, JobStore
 from atomic_flix.wav import save_wav
+from sheet_samples import write_sheet
 
 SHOTS = """\
 N01 cutaway
@@ -70,7 +71,8 @@ def _film_json(root: Path) -> None:
             "stems": {"mix": "audio/mix.wav", "voice": "audio/voice.wav"}, "lineup_rows": "shots.txt",
             "downbeat_slot": 0, "ends_at": 22.0, "look": "photo", "frame": SIZE, "never": ["umbrella"],
             "props": {"lamp": {"ref": LAMP, "words": ["lantern"]}},
-            "characters": {"Mira": {"identity": "refs/front.png", "hero": "refs/front.png", "body": "refs/body.png"}},
+            "characters": {"Mira": {"identity": "refs/front.png", "hero": "refs/front.png", "body": "refs/body.png",
+                                    "views": write_sheet(root, "Mira")}},
             "batch": {"takes": 1, "cards": 1},
             "setup": {"aspect": "16:9", "tier": "standard", "aspect_by": "Test Person"}}
     _write(root / "film.json", stamped("film", film))

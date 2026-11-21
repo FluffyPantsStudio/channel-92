@@ -10,6 +10,7 @@ from atomic_flix.lint import load_book, preflight
 from atomic_flix.lint.__main__ import main as lint_main
 from atomic_flix.plan.__main__ import main as plan_main
 from atomic_flix.wav import save_wav
+from sheet_samples import write_sheet
 
 SHOTS = """\
 N01 cutaway
@@ -41,7 +42,8 @@ def make_film(root, shots=SHOTS):
             "wardrobe": {"eighties": "wearing a white 1980s jacket with wide padded shoulders over a black top"},
             "tone": "serious and soulful", "stems": {"mix": "audio/mix.wav", "voice": "audio/voice.wav"},
             "downbeat_slot": 0, "ends_at": 22.0, "look": "photo",
-            "characters": {"Nova": {"identity": "refs/front.png", "hero": "refs/front.png", "body": "refs/body.png"}},
+            "characters": {"Nova": {"identity": "refs/front.png", "hero": "refs/front.png", "body": "refs/body.png",
+                                    "views": write_sheet(root, "Nova")}},
             "gates": {"song": {"sha256": sha}, "look": {"words": "yes, that is her"},
                       "spend": {"budget_s": 100000}},
             "batch": {"takes": 2, "cards": 2}}

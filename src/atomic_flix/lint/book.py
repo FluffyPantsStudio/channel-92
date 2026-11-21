@@ -14,6 +14,7 @@ from types import MappingProxyType
 from typing import Mapping, Sequence
 
 from ..brand.logo import png_size
+from ..cast import Plainness, as_plainness, cast_of, measure_view, views_of
 from ..plan import Line, Pulse, ShotSpec, lines_from_json, parse_shot_list, pulse_from_json
 from ..runner.names import KIT_MAPS
 from ..runner.places import film_file, inside
@@ -29,6 +30,7 @@ class Book:
     still_prompts: dict[str, str] = field(default_factory=dict)
     keyframes: dict[str, dict] = field(default_factory=dict)
     pictures: dict[str, tuple[int, int]] = field(default_factory=dict)
+    plain: dict[str, Plainness | str] = field(default_factory=dict)    # sheet picture -> measurement, or why not
     lines: dict[str, Line] = field(default_factory=dict)
     pulse: Pulse | None = None
     cuts: list[dict] = field(default_factory=list)
@@ -126,7 +128,9 @@ def book_from_case(case: Mapping) -> Book:
     lines = {row["key"]: _line(row) for row in case.get("lines", [DEFAULT_LINE])}
     pictures = {key: (int(size[0]), int(size[1])) for key, size in case.get("pictures", {}).items()}
     return Book(film=film, shots=shots, tasks=tasks, prompts=prompts, still_prompts=still_prompts, keyframes=keyframes,
-                pictures=pictures, lines=lines, pulse=pulse, cuts=list(case.get("cuts", [])),
+                pictures=pictures, plain={k: as_plainness(v) for k, v in case.get("plain", {}).items()},
+                lines=lines, pulse=pulse,
+                cuts=list(case.get("cuts", [])),
                 ends_at=case.get("ends_at"),
                 sung_db=case.get("sung_db"), song_sha256=case.get("song_sha256"),
                 graphs=dict(case.get("graphs", {})), batch=dict(case.get("batch", {})),
@@ -182,6 +186,24 @@ def graph_sidecar(root: Path, graph: object) -> Path:
     return aim.with_suffix(".meta.json")
 
 
+def measure_sheets(root: Path, film: Mapping) -> dict[str, Plainness | str]:
+    """How plain the background of every sheet picture the film names and the folder holds is; for one that cannot be
+    read, the reason (it is saved as a PNG so the rule can be measured)."""
+    measured: dict[str, Plainness | str] = {}
+    for person in cast_of(film).values():
+        for path in views_of(person).values():
+            try:
+                aim = film_file(root, path, "view")
+            except TemplateError:
+                continue
+            if aim.is_file() and path not in measured:
+                try:
+                    measured[path] = measure_view(root, aim.relative_to(Path(root).resolve()).as_posix())
+                except (ValueError, OSError) as problem:
+                    measured[path] = str(problem)
+    return measured
+
+
 def load_book(root: Path) -> Book:
     """Everything a film folder holds that the checks read."""
     root = Path(root)
@@ -220,7 +242,8 @@ def load_book(root: Path) -> Book:
     mix = (film.get("stems") or {}).get("mix")
     rules_dir = root / "rules"
     return Book(film=film, shots=shots, tasks=tasks, prompts=prompts, still_prompts=still_prompts, keyframes=keyframes,
-                pictures=pictures, lines=lines, pulse=pulse, cuts=(_read(plan_dir / "cuts.json") or {}).get("cuts", []),
+                pictures=pictures, plain=measure_sheets(root, film), lines=lines, pulse=pulse,
+                cuts=(_read(plan_dir / "cuts.json") or {}).get("cuts", []),
                 ends_at=film.get("ends_at"), sung_db=voice_lines.get("sung_db"),
                 song_sha256=sha256_of(film_file(root, mix, "stems.mix")) if mix else None, graphs=graphs,
                 batch=dict(film.get("batch") or {}), root=root, rules_dir=rules_dir if rules_dir.exists() else None)

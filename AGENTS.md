@@ -44,7 +44,7 @@ Environment variables (all optional):
 
 `atomic-flix new FILM --song mix.wav --voice voice.wav --band band.wav --drums drums.wav --lyric lyric.txt` makes the
 film folder; `atomic-flix progress FILM` always says what is next and what is missing or stale. Verbs in order:
-`structure` (the song's sections and story gaps, shown at gate 1 with the concept), `choose` (the director's aspect,
+`structure` (the song's sections and story gaps, shown at gate 1 with the concept), `refs` (the characters' sheets, below), `choose` (the director's aspect,
 and the year: setup choices recorded before anything is generated, not gates; `plan` and `shoot` refuse until the
 aspect is chosen), `time`, `bars`, `plan`, `lint`, `budget`, `eval`, `shoot`, `place`, `cut`, `grade`, `review`, `finish`, `compare`,
 with `eval` again before gate 6. `finish` writes the delivered film, `cuts/vNN-final.mp4`: the logo, then the era's
@@ -89,6 +89,17 @@ scene (ACT1) unless the person wrote `no_blender: reason` on it, and asks about 
 `shoot` reads the plan, so run `plan` again after editing the shot list (ACT3 checks it). Never write the reason
 yourself, never delete the action words from a beat to get past the rule, and never edit the word lists
 (`rules/action.txt`, `rules/action-maybe.txt`) to silence it. Faces and sung lines stay with the model.
+
+**Characters are drawn from a sheet, never from one picture.** Every character (the star and each entry of
+`characters`) has a reference sheet like a studio reference board: seven separate pictures, head and shoulders from the
+front, three-quarter, side and back, and full-length from the front, three-quarter and back, each a TALL PORTRAIT the
+figure fills, on a plain studio backdrop with no place behind it (`docs/characters.md`; Claudia's sheet at
+claudia.gallery is the model). `refs FILM` writes the prompts, `refs FILM --board` makes the board a director reviews.
+Lint blocks a missing view (CHR1), a figure small in a wide frame, measured on the picture (CHR4), a busy background
+(CHR2, a coarse screen: look at every view at full size yourself or with a cold judge), and a still seen from an angle
+that lacks that angle's view or a back view that carries the front face (CHR3). Turn a head from a faceless grey pose plate, never from a plate with a face, and clothe body plates (never nude, above
+all for a child character). Never pass a check by touching up a picture's edge or cropping around a small figure, and
+never describe a place in a sheet prompt.
 
 **Lint blocks for a reason.** `atomic-flix lint` encodes the rules a first film paid for (no hands named in a sung
 prompt, no smile on a singing mouth, one mood word, no grain in masters, and so on). Fix the cause; do not edit the

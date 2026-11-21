@@ -22,6 +22,7 @@ and lists what happens in a cutaway or silent shot, in order. A `#` after a spac
       figures: yes
       cam_move: the camera follows at running pace
       blender: scenes/N09-chase.json
+      view: back                       # the angle she is seen from: front, three_quarter, profile or back
       beat: the android sprints down the street
       # no_blender: <reason>           instead of `blender:`, the person's own reason this action needs none
 """
@@ -35,7 +36,7 @@ from .model import KINDS, PlanError, ShotSpec
 _TOP_ROW = re.compile(r"^(?P<key>[A-Za-z][\w-]*)\s+(?P<kind>[a-z]+)\s*(?::\s*(?P<lines>.*))?$")
 _FIELD = re.compile(r"^(?P<name>[a-z_]+)(?:\s+(?P<arg>[\w-]+))?\s*:\s*(?P<value>.*)$")
 _TEXT_FIELDS = ("still", "closing_still", "setup", "framing", "place", "goal", "cam_move", "pin", "at", "outfit",
-                "scene", "blender", "no_blender")
+                "scene", "blender", "no_blender", "view")
 _YES = {"yes", "true", "y", "1"}
 _NO = {"no", "false", "n", "0"}
 

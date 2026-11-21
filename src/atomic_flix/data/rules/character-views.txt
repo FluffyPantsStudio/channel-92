@@ -1,0 +1,13 @@
+# The views every character's reference sheet holds (CHR1), one picture each, modelled on a studio reference board:
+# head-and-shoulders views from every side (front, three_quarter, profile, back), and full-length views (body_front,
+# body_three_quarter, body_back) so build, outfit and proportions are fixed too. Every view is a TALL PORTRAIT picture the
+# figure fills (CHR4) on a plain studio backdrop with no place behind it (CHR2). A model that has seen one picture of a
+# face draws every angle from it, and a picture with a street behind it carries the street into every shot.
+# Names are used in film.json (`characters.NAME.views`) and in a shot's `view:` (body views: `view: body_back`...).
+front
+three_quarter
+profile
+back
+body_front
+body_three_quarter
+body_back

@@ -17,6 +17,7 @@ from ..timing import parse_lyric
 from ..plan import PlanError, parse_shot_list
 from ..plan.action import progress_lines
 from ..project.setup import setup_lines
+from .cast_steps import cast_lines
 from .common import LINEUP_FILE, Film, StepError, film_argument, parser
 from .setup_steps import add_setup_arguments, apply_new_choices, check_new_choices
 from .sound_steps import VOICE_LINES
@@ -103,6 +104,7 @@ def readiness(film: Film) -> list[str]:
     if not film.lineup_rows.is_file() or not film.lineup_rows.read_text(encoding="utf-8").strip():
         lines.append(f"todo   {LINEUP_FILE}: the shot list is missing; needed by plan (gate 4, the board)")
     lines += action_lines(film)
+    lines += cast_lines(film)
     star = film.data.get("star") or {}
     if not star.get("name") or not star.get("who"):
         lines.append("todo   film.json: singer.name and singer.who (one sentence from canon, approved by the person) "

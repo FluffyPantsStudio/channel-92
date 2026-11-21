@@ -88,6 +88,7 @@ class ShotSpec:
     takes: int | None = None
     blender: str | None = None      # the Blender scene file (in the film folder) that stages this shot's movement
     no_blender: str | None = None   # the person's written reason an action shot is not staged in Blender
+    view: str | None = None         # the angle seen from (front, three_quarter, profile, back): the sheet view used
     extra: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:

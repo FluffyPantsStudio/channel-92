@@ -11,12 +11,12 @@ from __future__ import annotations
 import sys
 from typing import Callable, Sequence
 
-from . import (cut_steps, desk_steps, eval_steps, finish_steps, grade_steps, prereq_steps, project_steps, setup_steps,
-               shoot_steps, sound_steps, structure_steps)
+from . import (cast_steps, cut_steps, desk_steps, eval_steps, finish_steps, grade_steps, prereq_steps, project_steps,
+               setup_steps, shoot_steps, sound_steps, structure_steps)
 from .common import StepError
 
 Handler = Callable[[Sequence[str]], int]
-FILM_ORDER = ("new", "progress", "gate", "packet", "desk", "structure", "choose", "time", "bars", "plan", "lint",
+FILM_ORDER = ("new", "progress", "gate", "packet", "desk", "structure", "choose", "refs", "time", "bars", "plan", "lint",
               "budget", "eval", "shoot", "place", "cut",
               "grade", "review", "finish", "compare")
 
@@ -60,8 +60,8 @@ def _folder_verbs(argv: Sequence[str]) -> int:
 
 
 STEPS: dict[str, tuple[str, Handler]] = {
-    **project_steps.COMMANDS, **desk_steps.COMMANDS, **structure_steps.COMMANDS, **setup_steps.COMMANDS,
-    **sound_steps.COMMANDS, **shoot_steps.COMMANDS, **eval_steps.COMMANDS,
+    **project_steps.COMMANDS, **cast_steps.COMMANDS, **desk_steps.COMMANDS, **structure_steps.COMMANDS,
+    **setup_steps.COMMANDS, **sound_steps.COMMANDS, **shoot_steps.COMMANDS, **eval_steps.COMMANDS,
     "plan": ("plan cuts on the bar, each shot's slice, gated voice and prompts (plan/)", _plan),
     "cut": (cut_steps.COMMANDS["cut"][0], _either(cut_steps.COMMANDS["cut"][1], "cut", ("audit", "encode", "flash"))),
     "grade": (grade_steps.COMMANDS["grade"][0],

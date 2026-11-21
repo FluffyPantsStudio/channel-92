@@ -19,6 +19,7 @@ from atomic_flix.cut.media import probe, write_image
 from atomic_flix.lint.registry import RULE_DATA
 from fake_comfyui import FakeComfy
 from fake_renders import make_clip
+from sheet_samples import write_sheet
 from runner_samples import SILENT_GRAPH, SUNG_GRAPH, write_graph
 from tool_loader import load_tool
 
@@ -76,6 +77,7 @@ def test_a_tiny_film_from_stems_to_compare(tmp_path, song, capsys):
     data = json.loads((film / "film.json").read_text(encoding="utf-8"))
     data.update({"frame": [448, 256], "final_size": [448, 256], "batch": {"takes": 1, "cards": 1},
                  "wardrobe": {"main": "wearing a white jacket over a black top"}})
+    data["star"] = {**data["star"], "views": write_sheet(film, "Nova")}       # her sheet: four views, plain background
     (film / "film.json").write_text(json.dumps(data), encoding="utf-8")
 
     run("structure", film)

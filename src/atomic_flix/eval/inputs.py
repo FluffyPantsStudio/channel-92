@@ -16,6 +16,7 @@ from typing import Iterable, Mapping
 
 import atomic_flix
 
+from ..cast import cast_of, views_of
 from ..lint.book import graph_sidecar
 from ..plan.vocab import DATA
 from ..runner.places import film_file
@@ -25,10 +26,10 @@ KIT_INPUTS = ("rules-map.json", "lessons.json", "rules/*.txt")
 TASK_FILES = ("still", "closing_still", "audio")
 GROUPS: Mapping[str, tuple[str, ...]] = {
     "lint": ("film.json", "standing.json", "@lineup", "@mix", "analysis/*.json", "plan/*.json", "plan/*.txt",
-             "plan/*.wav", "stills/*.json", "rules/*.txt", "scenes/*.json", "renders/*/r*.job.json", "@tasks"),
+             "plan/*.wav", "stills/*.json", "rules/*.txt", "scenes/*.json", "@views", "renders/*/r*.job.json", "@tasks"),
     "sent": ("film.json", "@lineup", "rules/*.txt", "renders/*/r*.job.json"),
     "ledger": ("standing.json", "@lineup", "stills/*.json", "renders/*/r*.job.json"),
-    "scene": ("film.json", "@lineup", "plan/*.task.json", "stills/*.json", "stills/*.png", "@tasks"),
+    "scene": ("film.json", "@lineup", "plan/*.task.json", "stills/*.json", "stills/*.png", "@views", "@tasks"),
     "cut": ("cuts/*.json", "cuts/*.mp4"),
 }
 MISSING = "missing"
@@ -86,6 +87,9 @@ def _expand(root: Path, pattern: str, film: object) -> list[str]:
         return _named(root, mix, "stems.mix") if mix else []
     if pattern == "@tasks":
         return _task_files(root)
+    if pattern == "@views":
+        return [name for person in cast_of(film).values() for path in views_of(person).values()
+                for name in _named(root, path, "character view")]
     return [path.relative_to(root).as_posix() for path in sorted(root.glob(pattern)) if path.is_file()]
 
 

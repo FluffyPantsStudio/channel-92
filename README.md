@@ -10,7 +10,8 @@ instrumental breaks where pictures have to carry the story), so a film's story i
 plans cuts on the bar, writes the prompts, drives ComfyUI graphs on your own GPUs for the renders and Blender for sets
 and passes, places each render back on the song by its sound, and assembles, grades and checks the cut. Action (a
 fight, a chase, a jump) is staged in Blender and the model follows it, because a video model alone cannot move bodies
-convincingly (`docs/action.md`). Stems, stills
+convincingly (`docs/action.md`). Every character is drawn from a sheet of views on a plain background, never one
+portrait (`docs/characters.md`). Stems, stills
 and renders stay on your machine. Every stage reads and writes plain JSON in the project folder, so a person can stop,
 look, edit and go on, and a person decides at six gates (concept, the song by ear, the look, the board, the render
 time, the cut) and nowhere else.
