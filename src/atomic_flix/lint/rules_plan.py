@@ -243,6 +243,19 @@ def maybe_action_without_blender(book):
                              "scene")
 
 
+@rule("ACT5")
+def still_off_the_blender_frame(book):
+    """A Blender shot's first frame follows the Blender frame's layout (the edges of the two agree)."""
+    from ..scenes.overlay import OVERLAY_MIN
+
+    for key, found in book.overlay.items():
+        if isinstance(found, str):
+            yield key, f"the still and its Blender first frame cannot be compared ({found})"
+        elif found < OVERLAY_MIN:
+            yield key, (f"the still does not follow its Blender first frame: it has {found:.0%} of the blockout's "
+                        f"lines, {OVERLAY_MIN:.0%} is the least")
+
+
 @rule("CUT1")
 def cuts_in_order(book):
     cuts = book.cuts

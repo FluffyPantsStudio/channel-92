@@ -31,6 +31,7 @@ class Book:
     keyframes: dict[str, dict] = field(default_factory=dict)
     pictures: dict[str, tuple[int, int]] = field(default_factory=dict)
     plain: dict[str, Plainness | str] = field(default_factory=dict)    # sheet picture -> measurement, or why not
+    overlay: dict[str, float | str] = field(default_factory=dict)     # Blender shot -> share of its lines in the still, or why not
     lines: dict[str, Line] = field(default_factory=dict)
     pulse: Pulse | None = None
     cuts: list[dict] = field(default_factory=list)
@@ -128,7 +129,7 @@ def book_from_case(case: Mapping) -> Book:
     lines = {row["key"]: _line(row) for row in case.get("lines", [DEFAULT_LINE])}
     pictures = {key: (int(size[0]), int(size[1])) for key, size in case.get("pictures", {}).items()}
     return Book(film=film, shots=shots, tasks=tasks, prompts=prompts, still_prompts=still_prompts, keyframes=keyframes,
-                pictures=pictures, plain={k: as_plainness(v) for k, v in case.get("plain", {}).items()},
+                pictures=pictures, plain={k: as_plainness(v) for k, v in case.get("plain", {}).items()}, overlay=dict(case.get("overlay", {})),
                 lines=lines, pulse=pulse,
                 cuts=list(case.get("cuts", [])),
                 ends_at=case.get("ends_at"),
@@ -204,6 +205,29 @@ def measure_sheets(root: Path, film: Mapping) -> dict[str, Plainness | str]:
     return measured
 
 
+def measure_overlays(root: Path, tasks: Mapping[str, dict]) -> dict[str, float | str]:
+    """The share of each Blender shot's first-frame lines the still has and its Blender first frame, where both are in the folder; the
+    reason (a string) for a pair that cannot be read."""
+    from ..scenes.overlay import edge_match
+
+    found: dict[str, float | str] = {}
+    for key, task in tasks.items():
+        job = task.get("blender") if task.get("route") == "blender" else None
+        if not isinstance(job, dict) or not task.get("still"):
+            continue
+        frames = sorted((Path(root) / str(job.get("out", "")) / "controls").glob("first-*.png"))
+        try:
+            still = film_file(root, task["still"], "still")
+        except TemplateError:
+            continue
+        if frames and still.is_file():
+            try:
+                found[key] = edge_match(still, frames[0])
+            except (ValueError, OSError) as problem:
+                found[key] = str(problem)
+    return found
+
+
 def load_book(root: Path) -> Book:
     """Everything a film folder holds that the checks read."""
     root = Path(root)
@@ -242,7 +266,8 @@ def load_book(root: Path) -> Book:
     mix = (film.get("stems") or {}).get("mix")
     rules_dir = root / "rules"
     return Book(film=film, shots=shots, tasks=tasks, prompts=prompts, still_prompts=still_prompts, keyframes=keyframes,
-                pictures=pictures, plain=measure_sheets(root, film), lines=lines, pulse=pulse,
+                pictures=pictures, plain=measure_sheets(root, film), overlay=measure_overlays(root, tasks), lines=lines,
+                pulse=pulse,
                 cuts=(_read(plan_dir / "cuts.json") or {}).get("cuts", []),
                 ends_at=film.get("ends_at"), sung_db=voice_lines.get("sung_db"),
                 song_sha256=sha256_of(film_file(root, mix, "stems.mix")) if mix else None, graphs=graphs,

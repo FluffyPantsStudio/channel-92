@@ -21,6 +21,7 @@ model, so the look is ours; the movement comes from Blender, so it is right.
 | `lint` (ACT2, ACT3, block) | The scene file must be in the film folder, and the plan must agree with the shot list about Blender (`shoot` reads the plan, so run `plan` again after editing the list). |
 | `plan` | A Blender shot's task carries `route: "blender"` and `blender: {scene, out, guide}`. `out` is `blender/KEY/`; `guide` is the shot's `guide:` (depth, canny, edges or pose), else depth. A sung shot cannot be staged in Blender (and its `act` clauses are never read as action): cover the action with a cutaway. |
 | `progress` | Lists each action shot with no scene, each shot that may be action, and each Blender shot with the first thing it lacks: the scene file, the capture, the control clips for its guide, or a scene edited after its capture. |
+| `lint` (ACT5, warns) | The shot's first frame has most of the Blender first frame's lines: 60 % or more of the blockout's edge pixels have a line of the still within a few pixels. An edit model that recomposes (zooms out, recentres, moves a wall) fails it, and the video model would then animate a layout Blender never had. The threshold is a first guess for calibrating on real frames, so it warns; a reason goes in film.json under `ACT5:KEY`. |
 | board and report | A Blender shot's card and row say `(Blender)`. |
 | `shoot` | Blender shots render on `--action-graph`, a graph that takes the control clip as `$video`, with `blender/KEY/controls/<guide>-*.mp4` as that input. No clip, clips of two models (it does not guess), a scene edited after its clip, or a graph that could not carry the clip is refused by name rather than rendered without the movement. `budget` costs these renders at plate rates and says so: read the total as a floor. |
 
@@ -50,3 +51,23 @@ Faces and sung lines. A close-up of her singing is made from a still and the voc
 bodies and the camera in the wide and medium action shots around it, and the cut puts the two together. Limits worth
 knowing: SCAIL-2 over Blender plates is tested to 81 frames, so a longer move is cut into shots, not chained (L072);
 the stand-in is a figure, not a performance, so give each action beat a clear pose change a guide can show.
+
+## Keeping the scene plain, and the first frame honest
+
+What practitioners of the Blender-then-restyle pipeline agree on (a published 3D-to-AI action short, and community
+Blender-to-Wan workflows; mostly vendor and tutorial sources, with no head-to-head comparisons):
+
+- **Block the shot in plain grey.** Beveled boxes, one flat tone per object so elements separate by tone, no textures,
+  no characters, no clutter: small detail is what the restyle model misreads. The scene owns geometry, camera, timing and
+  cuts; the image model owns the look.
+- **The first frame shows every key element.** If the car only enters later, the model invents it. Move the camera in
+  Blender, not the prompt.
+- **Move like a real object.** Constant speeds, a true parabola for a jump, the camera and the subject keyed on the same
+  frames, handheld noise on the camera only.
+- **One readable camera idea per shot.**
+- **Restyle the first frame with the Blender frame as the only source of layout**, plus fixed style and character
+  references. Crop every reference to the film's aspect (a 16:9 reference overrides a 2.39:1 frame): lint AR1 checks the
+  still's shape, ACT5 checks its lines against the Blender frame.
+- **Look at the overlay before any video is made.** A perspective error in the first frame is animated faithfully.
+  Several seeds per first frame, and keep the one that matches.
+- **Guides, by what the shot needs:** depth for spatial fidelity, Canny for composition, pose for a character's motion.

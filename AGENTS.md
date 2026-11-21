@@ -101,6 +101,12 @@ that lacks that angle's view or a back view that carries the front face (CHR3). 
 all for a child character). Never pass a check by touching up a picture's edge or cropping around a small figure, and
 never describe a place in a sheet prompt.
 
+**Places have a sheet, and a Blender shot's first frame follows its Blender frame.** A place the film returns to is
+registered under `places` with a wide picture, one from about 90 degrees round, a landmark close-up and a one-line
+light note, and every still there carries the wide picture (`docs/places.md`, PL1 and PL2). Keep Blender scenes plain
+grey and look at the overlay before any video is made; ACT5 warns when the still has under 60 % of the Blender frame's
+lines (`docs/action.md`).
+
 **Lint blocks for a reason.** `atomic-flix lint` encodes the rules a first film paid for (no hands named in a sung
 prompt, no smile on a singing mouth, one mood word, no grain in masters, and so on). Fix the cause; do not edit the
 rules to pass. Nine questions are answered by a person or a cold reviewer (hands, mouth, marks, identity, gaze,

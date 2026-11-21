@@ -121,7 +121,7 @@ def missing_views(person: Mapping, rules_dir: Path | None = None) -> list[str]:
     return [view for view in required_views(rules_dir) if view not in have]
 
 
-def _pixels(path: Path) -> np.ndarray:
+def sampled_rgb(path: Path) -> np.ndarray:
     """The picture's colours as an (h, w, 3) uint8 array, sampled down to about MEASURE_SIDE on its long side."""
     try:
         from PIL import Image                     # optional: quick, and reads every kind of PNG
@@ -158,7 +158,7 @@ def plain_of(path: str | Path) -> Plainness:
     """Measure a picture. Raises ValueError, naming the file and the reason, for a file that cannot be read (corrupt,
     or a PNG kind the built-in reader does not take: save it as 8-bit RGB, not interlaced, not indexed)."""
     try:
-        pixels = _pixels(Path(path))
+        pixels = sampled_rgb(Path(path))
     except (ValueError, OSError, zlib.error, struct.error, IndexError, KeyError) as problem:
         raise ValueError(f"{Path(path).name}: {problem}") from None
     height, width = pixels.shape[:2]
@@ -194,3 +194,16 @@ def measure_view(root: Path, relative: str) -> Plainness:
     except OSError:
         pass
     return found
+
+
+PLACE_VIEWS = ("wide", "reverse", "landmark")
+
+
+def places_of(film: Mapping) -> dict[str, dict]:
+    """The film's registered places by name: `places: {NAME: {views: {wide, reverse, landmark}, light: "..."}}`."""
+    return {str(name): _dict(data) for name, data in _dict(film.get("places")).items()}
+
+
+def place_views(place: Mapping) -> dict[str, str]:
+    """A place's pictures: view name to path (empty paths dropped)."""
+    return {str(name): str(path) for name, path in _dict(place.get("views")).items() if path}

@@ -8,7 +8,7 @@ are right in the picture is never guessed here: a judge or the person answers th
 from __future__ import annotations
 
 from ..aspects import ASPECTS, matches_aspect
-from ..cast import cast_of, missing_views, required_views, views_of
+from ..cast import PLACE_VIEWS, cast_of, missing_views, place_views, places_of, required_views, views_of
 from .book import Book
 from .registry import rule
 
@@ -233,3 +233,30 @@ def still_without_its_view(book):
             problem = _view_problem(book, shot, record, name)
             if problem:
                 yield shot.key, problem
+
+
+@rule("PL1")
+def place_sheet_incomplete(book):
+    """Every registered place has a wide picture, one from about 90 degrees round, a landmark close-up and the light's
+    direction in one line, so every shot there matches the same place."""
+    for name, place in places_of(book.film).items():
+        views = place_views(place)
+        absent = [view for view in PLACE_VIEWS if view not in views]
+        if absent:
+            yield None, f"the place {name} has no {', '.join(absent)} picture"
+        for view, path in views.items():
+            if not book.exists(path):
+                yield None, f"the place {name}'s {view} picture {path} is not in the film folder"
+        if not str(place.get("light") or "").strip():
+            yield None, f"the place {name} has no `light` note (the practical light source and which side it is on)"
+
+
+@rule("PL2")
+def still_without_its_place(book):
+    """A still of a shot in a registered place (`scene:` names it) carries that place's wide picture."""
+    places = places_of(book.film)
+    for shot, record in _records(book):
+        place = places.get(shot.scene or "")
+        wide = place_views(place or {}).get("wide")
+        if place is not None and record and (not wide or wide not in (record.get("refs") or [])):
+            yield shot.key, f"is in the place {shot.scene} but its still lacks the place's wide picture {wide or '(none)'}"

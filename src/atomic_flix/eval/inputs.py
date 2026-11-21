@@ -16,7 +16,7 @@ from typing import Iterable, Mapping
 
 import atomic_flix
 
-from ..cast import cast_of, views_of
+from ..cast import cast_of, place_views, places_of, views_of
 from ..lint.book import graph_sidecar
 from ..plan.vocab import DATA
 from ..runner.places import film_file
@@ -88,8 +88,9 @@ def _expand(root: Path, pattern: str, film: object) -> list[str]:
     if pattern == "@tasks":
         return _task_files(root)
     if pattern == "@views":
-        return [name for person in cast_of(film).values() for path in views_of(person).values()
-                for name in _named(root, path, "character view")]
+        pictures = [path for person in cast_of(film).values() for path in views_of(person).values()]
+        pictures += [path for place in places_of(film).values() for path in place_views(place).values()]
+        return [name for path in pictures for name in _named(root, path, "character or place view")]
     return [path.relative_to(root).as_posix() for path in sorted(root.glob(pattern)) if path.is_file()]
 
 

@@ -31,6 +31,12 @@ def test_a_changed_or_missing_sheet_picture_changes_the_table(tmp_path):
     assert input_table(tmp_path)["refs/nova-front.png"] != before["refs/nova-front.png"]
 
 
+def test_the_place_pictures_are_inputs_too(tmp_path):
+    (tmp_path / "film.json").write_text(json.dumps({"places": {"alley": {"views": {"wide": "refs/places/a-wide.png"}}}}),
+                                        encoding="utf-8")
+    assert "refs/places/a-wide.png" in group_files(tmp_path, "lint")
+
+
 def test_a_view_outside_the_film_folder_is_refused_never_read(tmp_path):
     _film(tmp_path, {"front": "../elsewhere.png", "back": "/etc/passwd"})
     refused = [name for name in group_files(tmp_path, "lint") if name.startswith("refused:")]
