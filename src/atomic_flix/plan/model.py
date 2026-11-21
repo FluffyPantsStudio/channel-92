@@ -86,6 +86,8 @@ class ShotSpec:
     outfit: str | None = None
     scene: str | None = None        # shots of one scene share a master still, prop references, aspect and look
     takes: int | None = None
+    blender: str | None = None      # the Blender scene file (in the film folder) that stages this shot's movement
+    no_blender: str | None = None   # the person's written reason an action shot is not staged in Blender
     extra: Mapping[str, str] = field(default_factory=dict)
 
     def __post_init__(self) -> None:

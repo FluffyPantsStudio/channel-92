@@ -1,0 +1,56 @@
+# Action verbs (ACT1, blocks): a shot whose written beats name one of these is an action shot, and a video model alone
+# does not move bodies through space convincingly (limbs merge, contact is faked, momentum is lost). Staged in Blender,
+# the model only has to dress a movement that already exists. Whole words or phrases, lower case.
+# Keep this list to terms that almost never mean anything else in a shot description. Terms that often do (a tear
+# "runs down" a cheek, a "kick drum", a heart that "leaps") live in action-maybe.txt and only warn.
+fight
+fights
+fighting
+brawl
+brawls
+punch
+punches
+punching
+parry
+parries
+duel
+duels
+wrestle
+wrestles
+wrestling
+grapple
+grapples
+takedown
+shootout
+gunfight
+chase
+chases
+chasing
+sprint
+sprints
+sprinting
+flee
+flees
+fleeing
+runs away
+running away
+runs after
+run after
+runs toward
+run toward
+runs across
+running across
+at full speed
+race past
+races past
+racing past
+shoots at
+fires at
+swings at
+swing at
+slams into
+slam into
+crashes into
+crash into
+collides with
+collide with

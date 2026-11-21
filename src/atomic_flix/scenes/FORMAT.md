@@ -1,7 +1,8 @@
 # Scene descriptions (`atomic-flix/scene@1`)
 
 A scene is one JSON file that says which building blocks stand where, how the set is lit, what the sky is, how the
-viewpoint moves and what to capture. `python -m atomic_flix.scenes check SCENE.json` validates it without Blender;
+viewpoint moves and what to capture. A film's action shots are staged this way (`docs/action.md`): the shot list names
+the scene with `blender:`, and lint refuses an action shot without one. `python -m atomic_flix.scenes check SCENE.json` validates it without Blender;
 `plan` prints the flat op list Blender will execute; `capture` builds and renders it; `controls` turns the render into
 control clips for a video model.
 

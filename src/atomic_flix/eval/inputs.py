@@ -25,7 +25,7 @@ KIT_INPUTS = ("rules-map.json", "lessons.json", "rules/*.txt")
 TASK_FILES = ("still", "closing_still", "audio")
 GROUPS: Mapping[str, tuple[str, ...]] = {
     "lint": ("film.json", "standing.json", "@lineup", "@mix", "analysis/*.json", "plan/*.json", "plan/*.txt",
-             "plan/*.wav", "stills/*.json", "rules/*.txt", "renders/*/r*.job.json", "@tasks"),
+             "plan/*.wav", "stills/*.json", "rules/*.txt", "scenes/*.json", "renders/*/r*.job.json", "@tasks"),
     "sent": ("film.json", "@lineup", "rules/*.txt", "renders/*/r*.job.json"),
     "ledger": ("standing.json", "@lineup", "stills/*.json", "renders/*/r*.job.json"),
     "scene": ("film.json", "@lineup", "plan/*.task.json", "stills/*.json", "stills/*.png", "@tasks"),

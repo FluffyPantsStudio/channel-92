@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from ..plan.action import action_words, maybe_words, may_need_blender, needs_blender
 from ..plan.cuts import PIN_EXIT
 from ..setups import reads_as_jump, size_note
 from ..plan.slices import HEAD, MAX_SECONDS, MIN_SECONDS, TAIL
@@ -207,6 +208,39 @@ def depth_with_other_build(book):
     for shot in book.shots:
         if _extra(shot, "guide") == "depth" and _extra(shot, "build_differs") in ("yes", "true"):
             yield shot.key, "depth guide while the character's build differs from the performer's"
+
+
+@rule("ACT1")
+def action_without_blender(book):
+    for shot in book.shots:
+        if needs_blender(shot, _rd(book)):
+            yield shot.key, (f"an action shot ({', '.join(action_words(shot, _rd(book)))}) with no Blender scene "
+                             "and no written reason")
+
+
+@rule("ACT2")
+def blender_scene_missing(book):
+    for shot in book.shots:
+        if shot.blender and not book.exists(shot.blender):
+            yield shot.key, f"the Blender scene {shot.blender} is not in the film folder"
+
+
+@rule("ACT3")
+def plan_out_of_step_with_blender(book):
+    """`shoot` reads the plan, lint reads the shot list: they must say the same about Blender."""
+    for shot, task in tasks(book):
+        planned = (task.get("blender") or {}).get("scene") if task.get("route") == "blender" else None
+        if planned != (shot.blender or None):
+            yield shot.key, (f"the shot list says Blender scene {shot.blender or 'none'}, the plan says "
+                             f"{planned or 'none'}: run `plan` again")
+
+
+@rule("ACT4")
+def maybe_action_without_blender(book):
+    for shot in book.shots:
+        if may_need_blender(shot, _rd(book)):
+            yield shot.key, (f"may be an action shot ({', '.join(maybe_words(shot, _rd(book)))}) with no Blender "
+                             "scene")
 
 
 @rule("CUT1")

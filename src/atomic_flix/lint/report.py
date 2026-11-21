@@ -16,6 +16,12 @@ def _hours(seconds: float) -> str:
     return f"{seconds / 3600:.2f} h"
 
 
+def _role(task: dict, kind: str) -> str:
+    """The shot's role for a table or card; a shot staged in Blender says so."""
+    role = task.get("role", kind)
+    return f"{role} (Blender)" if task.get("route") == "blender" else role
+
+
 def report_markdown(book: Book, verdict: Verdict) -> str:
     """Gate 5: how many takes, at what size, and the hours they will hold the cards; then what blocks."""
     name = book.film.get("name", "the film")
@@ -34,7 +40,7 @@ def report_markdown(book: Book, verdict: Verdict) -> str:
         ]
         for row in batch.rows.values():
             task = book.tasks.get(row.key) or {}
-            lines.append(f"| {row.key} | {task.get('role', row.kind)} | {task.get('pin', '')} | {row.seconds} | "
+            lines.append(f"| {row.key} | {_role(task, row.kind)} | {task.get('pin', '')} | {row.seconds} | "
                          f"{row.takes} | {row.rate:g} | {row.busy_s / 60:.1f} |")
         lines.append("")
     state = "BLOCKED: nothing will be queued." if verdict.blocked else "Clear to queue once the person says yes."
@@ -84,7 +90,7 @@ def board_html(book: Book) -> str:
         cards.append(
             f'<figure class="shot"><img src="{esc(still)}" alt="first frame of {esc(shot.key)}" width="320" '
             f'height="176" loading="lazy"><figcaption><b>{index:02d} {esc(shot.key)}</b> '
-            f'<span class="kind">{esc(task.get("role", shot.kind))}</span><br>{esc(span)}<br>{what}'
+            f'<span class="kind">{esc(_role(task, shot.kind))}</span><br>{esc(span)}<br>{what}'
             f'</figcaption></figure>')
     title = esc(f"{book.film.get('name', 'Film')} board")
     style = ("body{font:14px/1.4 system-ui,sans-serif;margin:16px;background:#f4f1ea;color:#1d1b18}"

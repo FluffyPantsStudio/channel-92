@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Mapping, Sequence
 
 from ..setups import reads_as_jump, size_note
+from .action import GUIDES, guide_of
 from .cuts import PIN_EXIT, Cut, first_sound, last_sound, plan_cuts
 from .model import Line, PlanError, Pulse, ShotSpec
 from .slices import gate_span, phrases_in_slice, slice_bounds, spread_steps, whole_second_steps
@@ -121,6 +122,18 @@ def _scene_task(shot: ShotSpec, on: tuple[float, float]) -> dict:
             "pin": pin, "figures": shot.has_person, "cam_move": shot.cam_move or "locked", "notes": notes}
 
 
+def blender_job(shot: ShotSpec) -> dict:
+    """Where a Blender shot's scene file is, where its capture and control clips go, and which clip guides the take
+    (the shot's `guide:`, else depth; a pose clip when a figure's build differs from the stand-in's)."""
+    if shot.kind == "vocal":
+        raise PlanError(f"{shot.key}: a sung shot cannot be staged in Blender (the model must hear and sing the "
+                        "line); cover the action with a cutaway")
+    guide = guide_of(shot)
+    if guide not in GUIDES:
+        raise PlanError(f"{shot.key}: guide {guide!r} is not one of {', '.join(GUIDES)}")
+    return {"scene": shot.blender, "out": f"blender/{shot.key}", "guide": guide}
+
+
 def _size_notes(shots: Sequence[ShotSpec]) -> list[str]:
     """Neighbouring vocal shots, also across one cutaway, on one setup need clearly different sizes (C1)."""
     notes = []
@@ -149,12 +162,16 @@ def plan_film(shots: Sequence[ShotSpec], lines: Sequence[Line] | Mapping[str, Li
         on = (cut.at, end)
         if end - cut.at < 1.6:
             notes.append(f"{shot.key} is on screen {end - cut.at:.2f} s, under 1.6 s")
+        job = blender_job(shot) if shot.blender else None      # refuses a bad guide or a sung shot first
         task = _vocal_task(shot, on, table, names) if shot.kind == "vocal" else _scene_task(shot, on)
         if cut.note:
             task["notes"] = [f"cut: {cut.note}"] + task["notes"]
             notes.append(f"{shot.key}: {cut.note}")
         if shot.scene:
             task["scene"] = shot.scene         # optional; a task without it belongs to no scene
+        if job is not None:
+            task["route"] = "blender"          # the movement is staged in Blender; the model follows its control clip
+            task["blender"] = job
         tasks[shot.key] = task
     notes.extend(_size_notes(shots))
     return Plan(cuts=cuts, tasks=tasks, notes=notes, ends_at=ends_at)

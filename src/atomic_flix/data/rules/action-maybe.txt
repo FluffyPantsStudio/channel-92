@@ -1,0 +1,64 @@
+# Words that may mean an action shot (ACT4, warns): a fall, a leap, a crash, a kick can be a fight or a figure of
+# speech ("a tear runs down her cheek", "the kick drum hits", "sunlight breaks through the clouds", "her heart leaps").
+# A shot that uses one is read by a person: stage it in Blender, or write why it needs none in film.json `reasons`
+# (key ACT4:SHOT). Whole words or phrases, lower case.
+kick
+kicks
+kicking
+slash
+slashes
+slashing
+stab
+stabs
+leap
+leaps
+leaping
+jump
+jumps
+jumping
+vault
+vaults
+dive
+dives
+diving
+tumble
+tumbles
+somersault
+cartwheel
+flip over
+flips over
+dodge
+dodges
+dodging
+tackle
+tackles
+pursue
+pursues
+pursuit
+run down
+runs down
+running down
+hurl
+hurls
+fling
+flings
+smash
+smashes
+crash
+crashes
+crashing
+collide
+collides
+collision
+explode
+explodes
+explosion
+bursts through
+burst through
+breaks through
+plunges
+falls back
+falls out of
+shatter
+shatters
+shattering

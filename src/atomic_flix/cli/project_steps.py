@@ -14,6 +14,8 @@ from ..gates import GATE_IDS, PERSON_DIRECT, RELAYED, Answer, GateRefused, gate_
 from ..project import (FilmFolder, ProjectError, answer_gate, ask_gate, create_project, reopen_gate, validate,
                        where_it_stands)
 from ..timing import parse_lyric
+from ..plan import PlanError, parse_shot_list
+from ..plan.action import progress_lines
 from ..project.setup import setup_lines
 from .common import LINEUP_FILE, Film, StepError, film_argument, parser
 from .setup_steps import add_setup_arguments, apply_new_choices, check_new_choices
@@ -72,6 +74,19 @@ def structure_line(film: Film) -> str:
     return f"ok     {STRUCTURE_PAGE}: the song's structure, shown at gate 1 with the concept"
 
 
+def action_lines(film: Film) -> list[str]:
+    """Action shots and Blender shots of the shot list, with what each still lacks (docs/action.md). A shot list that
+    cannot be read adds nothing here: `plan` is the step that names its fault."""
+    if not film.lineup_rows.is_file():
+        return []
+    try:
+        shots = parse_shot_list(film.lineup_rows.read_text(encoding="utf-8"))
+    except (PlanError, UnicodeDecodeError):
+        return []
+    rules = film.root / "rules"
+    return progress_lines(film.root, shots, rules if rules.is_dir() else None)
+
+
 def readiness(film: Film) -> list[str]:
     """What the folder lacks before each step, in plain lines: the validator's findings, then the kit's own."""
     stems = film.data.get("stems") or {}
@@ -87,6 +102,7 @@ def readiness(film: Film) -> list[str]:
         lines.append(f"ok     lyric.txt: {len(parsed)} sung lines ({', '.join(parts)})")
     if not film.lineup_rows.is_file() or not film.lineup_rows.read_text(encoding="utf-8").strip():
         lines.append(f"todo   {LINEUP_FILE}: the shot list is missing; needed by plan (gate 4, the board)")
+    lines += action_lines(film)
     star = film.data.get("star") or {}
     if not star.get("name") or not star.get("who"):
         lines.append("todo   film.json: singer.name and singer.who (one sentence from canon, approved by the person) "

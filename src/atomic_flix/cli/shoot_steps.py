@@ -21,8 +21,10 @@ from ..gates import GateRefused
 from ..lint import load_book, preflight, vet
 from ..lint.report import write_reports
 from ..lint.rules_process import batch_of
+from ..plan.action import GUIDES
 from ..project import ProjectError, draw_batch, load_standing, require_gate
 from ..runner import JobStore, Request, Runner, estimate, gate_text, load_meta, plan_batch, read_rows
+from ..runner.template import load_graph, placeholders
 from ..runner.jobs import RUNNING, UNKNOWN, WAITING
 from ..runner.sched import headroom_floor
 from ..runner.template import TemplateError
@@ -95,11 +97,18 @@ def _lint(argv: Sequence[str]) -> int:
     return 1 if verdict.blocked else 0
 
 
+def _graph_kind(task: dict) -> str:
+    """Which of the shoot's graphs a task renders on: Blender shots on the action graph, sung shots on the sung one."""
+    if task.get("route") == "blender":
+        return "action"
+    return "vocal" if task.get("type") == "vocal" else "other"
+
+
 def _pseudo_jobs(film: Film, tasks: dict, takes: dict[str, int], graphs: dict[str, str]) -> list[dict]:
     width, height = film.frame
     jobs = []
     for key, task in tasks.items():
-        graph = graphs["vocal" if task.get("type") == "vocal" else "other"]
+        graph = graphs[_graph_kind(task)]
         for _ in range(takes[key]):
             jobs.append({"graph": graph, "width": width, "height": height, "fps": film.fps,
                          "frames": int(task["seconds"]) * film.fps + 1})
@@ -116,6 +125,8 @@ def _budget(argv: Sequence[str]) -> int:
     p.add_argument("--log", type=Path, help="the machine's job log (default: log/jobs.jsonl beside the film)")
     p.add_argument("--sung-graph", default="sung.json", help="graph name of vocal renders, to find them in the log")
     p.add_argument("--plate-graph", default="plate.json", help="graph name of other renders, to find them in the log")
+    p.add_argument("--action-graph", default="action.json",
+                   help="graph name of Blender-staged action shots, to find them in the log")
     p.add_argument("--hosts", type=int, default=2, help="GPU hosts that will share the batch")
     args = p.parse_args(argv)
     film = Film.open(args.film)
@@ -124,7 +135,8 @@ def _budget(argv: Sequence[str]) -> int:
     batch = batch_of(book)
     takes = {key: row.takes for key, row in batch.rows.items()}
     rows = read_rows(args.log or default_log(film))
-    graphs = {"vocal": Path(args.sung_graph).name, "other": Path(args.plate_graph).name}
+    graphs = {"vocal": Path(args.sung_graph).name, "other": Path(args.plate_graph).name,
+              "action": Path(args.action_graph).name}
     measured = estimate(_pseudo_jobs(film, tasks, takes, graphs), rows, hosts=args.hosts, parallel=False)
     use_log = measured.gpu_hours is not None
     busy_s = measured.gpu_hours * 3600 if use_log else batch.busy_s
@@ -134,6 +146,10 @@ def _budget(argv: Sequence[str]) -> int:
               "per_shot": {key: {"takes": row.takes, "seconds": row.seconds, "rate": row.rate,
                                  "busy_s": round(row.busy_s, 1)} for key, row in batch.rows.items()}}
     write_json(film.path(BUDGET), record, "budget")
+    action = [key for key, task in tasks.items() if task.get("route") == "blender"]
+    if action:
+        print(f"note: {', '.join(action)} are staged in Blender; their renders are costed at plate rates and the "
+              "hours do not include Blender's capture, so read the total as a floor (docs/action.md)")
     print(gate_text(measured) if use_log else
           f"{batch.takes} takes at {film.frame[0]}x{film.frame[1]}: about {batch.gpu_hours:.2f} GPU hours at the "
           f"first film's rates ({batch.wall_hours:.2f} h on {batch.cards} card).")
@@ -142,20 +158,58 @@ def _budget(argv: Sequence[str]) -> int:
     return 0
 
 
+GRAPH_FLAGS = {"vocal": "--sung-graph", "other": "--plate-graph", "action": "--action-graph"}
+
+
+def blender_clip(film: Film, key: str, job: dict) -> str:
+    """The control clip a Blender shot's take follows: the shot's guide, from `blender/KEY/controls/`. Refused, with
+    the commands that fix it, when the plan's entry is not one `plan` writes, there is no clip, clips of several
+    models are there (which one is meant is not guessed), or the scene changed after the clip was made."""
+    guide, out = job.get("guide"), job.get("out")
+    if guide not in GUIDES or out != f"blender/{key}":
+        raise StepError(f"{key}: the plan's Blender entry (guide {guide!r}, out {out!r}) is not one `plan` writes; "
+                        "run `atomic-flix plan` again")
+    found = sorted(film.path(f"{out}/controls").glob(f"{guide}-*.mp4"))
+    if not found:
+        raise StepError(f"{key} is staged in Blender but has no {guide} control clip in {out}/controls/; run "
+                        f"`atomic-flix scenes capture {job['scene']} {out}`, then `atomic-flix scenes controls "
+                        f"{out} --for ltx --size WxH` (docs/action.md)")
+    if len(found) > 1:
+        raise StepError(f"{key}: {len(found)} {guide} clips are in {out}/controls/ ({', '.join(p.name for p in found)}); "
+                        "keep the one for the action graph's model and size, and delete the others")
+    scene = film.path(job["scene"])
+    if scene.is_file() and scene.stat().st_mtime > found[0].stat().st_mtime:
+        raise StepError(f"{key}: the scene {job['scene']} changed after {found[0].name} was made; capture it and make "
+                        "its control clips again")
+    return film.folder.relative(found[0])
+
+
+def _blender_inputs(film: Film, key: str, task: dict, graph: str) -> dict[str, str]:
+    """The control clip slot of a Blender shot's render; refused when the graph has no `$video` to carry it, since
+    the Blender work would then be ignored without a word."""
+    if "video" not in set(placeholders(load_graph(graph))) | set(load_meta(graph).needs):
+        raise StepError(f"{key} is staged in Blender, but {Path(graph).name} takes no control clip ($video), so "
+                        "Blender's movement would be ignored; give --action-graph a graph that follows one")
+    return {"video": blender_clip(film, key, task["blender"])}
+
+
 def _requests(film: Film, tasks: dict, takes: dict[str, int], graphs: dict[str, str | None]) -> list[Request]:
     width, height = film.frame
     requests = []
     for key, task in tasks.items():
         vocal = task.get("type") == "vocal"
-        graph = graphs["vocal" if vocal else "other"]
+        kind = _graph_kind(task)
+        graph = graphs[kind]
         if graph is None:
-            raise StepError(f"{key} needs a {'--sung-graph' if vocal else '--plate-graph'}")
+            raise StepError(f"{key} needs a {GRAPH_FLAGS[kind]}")
         prompt_path = film.path(f"plan/{key}.prompt.txt")
         if not prompt_path.is_file():
             raise StepError(f"{key} has no prompt (plan/{key}.prompt.txt); run `atomic-flix plan`")
         inputs = {"opening_still": task["still"]}
         if vocal:
             inputs["audio"] = task["audio"]
+        if kind == "action":
+            inputs.update(_blender_inputs(film, key, task, graph))
         if task.get("closing_still") and "closing_still" in load_meta(graph).needs:
             inputs["closing_still"] = task["closing_still"]
         for _ in range(takes[key]):
@@ -211,7 +265,8 @@ def _plan_new_takes(film: Film, book, tasks: dict, args) -> list[dict]:
     plan = (batch.takes, tuple(film.frame), float(read_json(film.path(BUDGET))["busy_s"]))
     takes = {key: row.takes for key, row in batch.rows.items()}
     graphs = {"vocal": str(args.sung_graph.resolve()) if args.sung_graph else None,
-              "other": str(args.plate_graph.resolve()) if args.plate_graph else None}
+              "other": str(args.plate_graph.resolve()) if args.plate_graph else None,
+              "action": str(args.action_graph.resolve()) if args.action_graph else None}
     requests = _requests(film, tasks, takes, graphs)
     try:
         stamp = draw_batch(film.folder, len(requests), plan=plan, check_only=True)
@@ -235,6 +290,8 @@ def _shoot(argv: Sequence[str]) -> int:
     p.add_argument("keys", nargs="*", help="only these shots")
     p.add_argument("--sung-graph", type=Path, help="the ComfyUI API graph for vocal shots (in the film folder)")
     p.add_argument("--plate-graph", type=Path, help="the graph for mute shots and cutaways (in the film folder)")
+    p.add_argument("--action-graph", type=Path,
+                   help="the graph for action shots staged in Blender: it must take the control clip as $video")
     p.add_argument("--hosts", default=os.environ.get("ATOMIC_FLIX_HOSTS", DEFAULT_HOSTS))
     p.add_argument("--allow-remote", action="store_true", help="accept hosts that are not on this machine")
     p.add_argument("--log", type=Path, help="the machine's job log (default: log/jobs.jsonl beside the film)")

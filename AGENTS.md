@@ -82,6 +82,14 @@ serialised across processes).
 **Never touch what is not yours.** Do not clear a ComfyUI queue, stop or restart an instance that has work, or delete
 another job's files. Restart only an instance whose queue is empty.
 
+**Action is staged in Blender.** A shot that shows a fight, a chase, a jump, a crash or a fall gets its movement from a
+Blender scene, not from the video model: write `blender: scenes/KEY.json` on the shot, capture it and make its control
+clips, and shoot it on an action graph that follows the clip (`docs/action.md`). Lint blocks an action shot with no
+scene (ACT1) unless the person wrote `no_blender: reason` on it, and asks about words that may mean action (ACT4).
+`shoot` reads the plan, so run `plan` again after editing the shot list (ACT3 checks it). Never write the reason
+yourself, never delete the action words from a beat to get past the rule, and never edit the word lists
+(`rules/action.txt`, `rules/action-maybe.txt`) to silence it. Faces and sung lines stay with the model.
+
 **Lint blocks for a reason.** `atomic-flix lint` encodes the rules a first film paid for (no hands named in a sung
 prompt, no smile on a singing mouth, one mood word, no grain in masters, and so on). Fix the cause; do not edit the
 rules to pass. Nine questions are answered by a person or a cold reviewer (hands, mouth, marks, identity, gaze,
